@@ -121,3 +121,137 @@ railway variables set CACHE_DRIVER=redis QUEUE_CONNECTION=redis SESSION_DRIVER=r
 - TWILIO_SETUP_CHECKLIST.md
 - NOTIFICATION_EMAIL_SETUP.md
 - FIXED_EMAIL_ISSUE.md
+
+---
+
+## How do I migrate and seed MySQL on Railway?
+
+If you’ve switched this app to use a MySQL database on Railway, here are the supported ways to run migrations and seeders.
+
+Prerequisites:
+- In Railway → Variables for your web service, set the DB variables to your MySQL instance:
+  - DB_CONNECTION=mysql
+  - DB_HOST, DB_PORT (3306), DB_DATABASE, DB_USERNAME, DB_PASSWORD
+- Redeploy after changing variables so the app sees them.
+
+Recommended: This repository is configured to run migrations and seeders automatically after each deploy. We updated railway.toml to execute:
+
+```
+php artisan migrate --force --seed
+```
+
+That means on every successful deployment, pending migrations run and DatabaseSeeder executes. Ensure your seeders are idempotent (safe to run multiple times) or use guards (e.g., firstOrCreate) to avoid duplicates.
+
+Manual options (any time):
+
+1) From Railway Web UI Shell
+- Railway → Your Project → Services → web → Shell → Start shell.
+- Run either separately or combined:
+  - php artisan migrate --force
+  - php artisan db:seed --force
+  - Or in one go: php artisan migrate --force --seed
+- To run only a specific seeder class:
+  - php artisan db:seed --force --class=YourSeederClass
+
+2) Using Railway CLI from your local terminal
+- Link to your project: railway link
+- Run artisan inside the remote service context:
+  - railway run php artisan migrate --force --seed
+  - Or just seeding: railway run php artisan db:seed --force --class=YourSeederClass
+
+3) Running locally but targeting the Railway MySQL
+- Copy the DB_* credentials from Railway → Database → Connect.
+- Export them in your local shell for a one-off run (example):
+  - export DB_CONNECTION=mysql
+  - export DB_HOST=your-host
+  - export DB_PORT=3306
+  - export DB_DATABASE=your-db
+  - export DB_USERNAME=your-user
+  - export DB_PASSWORD=your-pass
+  - php artisan migrate --force --seed
+
+Verifying status
+- Check which migrations ran: php artisan migrate:status
+- Confirm seeded data using tinker: php artisan tinker → use App\Models\User; User::count();
+- Connect with mysql client (from shell): mysql -h "$DB_HOST" -P "$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE"
+
+Troubleshooting
+- SQLSTATE[HY000] Connection refused: Verify DB_HOST/PORT/USER/PASS and that your web service and DB are in the same Railway project or accessible publicly (as configured).
+- “No application encryption key specified”: ensure APP_KEY is set; redeploy to trigger key generation or run php artisan key:generate --force.
+- Duplicate seed rows: make seeders idempotent (firstOrCreate, upsert, or check existence before insert).
+- SSL/Mode issues: Some managed MySQL instances require SSL. If using external tools, enable SSL. Review SQL modes if strict mode causes migration errors.
+
+Note: The sample .env in this repo defaults to SQLite for local/demo. Make sure the deployed service overrides DB_CONNECTION and related variables to MySQL.
+
+## How do I check the database on Railway?
+
+Use any of the following approaches depending on what database you provisioned (MySQL, PostgreSQL, Redis) and how your service is configured.
+
+Important: In this repository, the sample .env is set to SQLite for local/demo use:
+
+```
+DB_CONNECTION=sqlite
+DB_DATABASE=/app/database/database.sqlite
+```
+
+If your Railway service actually uses MySQL or Postgres (recommended for production), make sure you’ve set the DB_* variables accordingly in Railway → Variables as shown earlier in this doc. The steps below cover SQLite, MySQL, and Postgres.
+
+### 1) Railway Web UI (fastest for managed DBs)
+- Open Railway → Your Project → Select your Database plugin (e.g., “PostgreSQL”, “MySQL”).
+- Click the “Data” or “Connect” tab to:
+  - View tables and run simple queries (Data tab availability depends on plugin version/UI).
+  - Copy connection credentials (host, port, database, user, password, URL) for external tools.
+
+### 2) One-off shell inside your Web service (artisan + CLI clients)
+- Railway → Your Project → Services → web → Shell → Start shell.
+- For Laravel checks:
+  - php artisan migrate:status — shows which migrations ran.
+  - php artisan tinker, then run a quick query, for example:
+    - DB::select('select 1');
+    - use App\Models\User; User::count();
+
+- If using SQLite (as in the default .env):
+  - sqlite3 /app/database/database.sqlite
+  - Inside sqlite3: .tables to list tables, select * from users limit 5; to inspect data.
+
+- If using Postgres:
+  - Ensure the psql client is available (it is on most Railway images). Then:
+    - psql "host=$DB_HOST port=$DB_PORT dbname=$DB_DATABASE user=$DB_USERNAME password=$DB_PASSWORD sslmode=require"
+
+- If using MySQL:
+  - mysql -h "$DB_HOST" -P "$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE"
+
+Tip: You can echo envs to confirm what the service sees: printenv | grep -E 'DB_|APP_ENV|APP_URL'
+
+### 3) Railway CLI from your local machine
+Prereqs: Install Railway CLI and log in.
+
+- Link your local directory to the Railway project (if not already):
+  - railway link
+
+- Spawn a database tunnel/connection:
+  - For Postgres example:
+    - railway connect postgres
+  - For MySQL example:
+    - railway connect mysql
+
+- Or simply read the variables to connect with your own client:
+  - railway variables | grep -E 'DB_|PG|MYSQL'
+
+Use those values with your local client:
+- Postgres (psql): psql "postgres://USER:PASSWORD@HOST:PORT/DBNAME?sslmode=require"
+- MySQL (mysql): mysql -h HOST -P PORT -u USER -pPASSWORD DBNAME
+
+### 4) Use a GUI client (TablePlus, Beekeeper, DBeaver, etc.)
+- Copy credentials from Railway → Database → Connect.
+- Paste into your client. For Postgres, set SSL Mode to “require” if needed.
+
+### 5) Quick health checks from Laravel
+- php artisan migrate:status — migrations should be “Yes”.
+- php artisan migrate --pretend — shows SQL that would run without executing.
+- php artisan tinker — run lightweight reads/writes using Eloquent.
+
+### Common gotchas
+- Wrong DB selected: Ensure DB_CONNECTION and related DB_* envs in the Railway service match your actual DB plugin.
+- SQLite vs Managed DB: If you deployed with default SQLite settings, your data is stored in /app/database/database.sqlite inside the container. Consider switching to a managed DB for durability and easier inspection.
+- Network/SSL errors: Use the exact host/port from Railway and set sslmode=require (Postgres) or enable SSL in your client if the plugin mandates it.
