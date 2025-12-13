@@ -140,6 +140,7 @@ railway variables set CACHE_DRIVER=redis QUEUE_CONNECTION=redis SESSION_DRIVER=r
 - 419 Page Expired (CSRF): ensure APP_URL is the exact https URL you visit.
 - Mail not sending: verify MAIL_* values and that the provider allows the from address. Use an app password for Gmail/Google Workspace.
 - Queues stuck: make sure you run a worker service: start command `php artisan queue:work --tries=1 --timeout=90` and that Redis vars are set.
+- Time zone warning during deploy: If you see `Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.`, the base image is missing tzdata. This repo includes nixpacks.toml to install `tzdata` and sets `TZ=UTC` in railway.toml. Trigger a Full Rebuild to apply.
 
 ## Related docs in this repo
 - WHATSAPP_QUICK_START.md
