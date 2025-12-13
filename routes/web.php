@@ -5,11 +5,46 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\UserManagementController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 // Lightweight health endpoint for platform health checks (no auth, no DB)
 Route::get('/health', function () {
     return response('OK', 200);
 });
+
+// On-demand diagnostics endpoint (disabled unless DIAG_TOKEN is set in env)
+if (!empty(env('DIAG_TOKEN'))) {
+    Route::get('/diag', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $data = [
+            'app' => [
+                'env' => env('APP_ENV'),
+                'debug' => (bool) env('APP_DEBUG', false),
+                'url' => config('app.url'),
+            ],
+            'health' => 'OK',
+            'database' => [
+                'default' => config('database.default'),
+                'mysql_host' => config('database.connections.mysql.host'),
+                'mysql_db' => config('database.connections.mysql.database'),
+            ],
+        ];
+
+        try {
+            DB::connection()->getPdo();
+            $data['database']['connected'] = true;
+        } catch (\Throwable $e) {
+            $data['database']['connected'] = false;
+            $data['database']['error'] = $e->getMessage();
+        }
+
+        return response()->json($data);
+    });
+}
 
 Route::get('/', function () {
     return redirect()->route('login');
