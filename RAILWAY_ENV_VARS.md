@@ -11,6 +11,31 @@ Note: APP_KEY is generated automatically during the build if not present (see ra
 
 Tip: Keep secrets (DB_PASSWORD, MAIL_PASSWORD, API tokens) only in Railway. Do not commit them to git.
 
+### Should I edit the .env file to use Railway MySQL credentials?
+- Short answer: No. Do not edit/commit the repo’s .env with your Railway MySQL credentials. Instead, set the DB_* variables in Railway → Variables.
+- Why: This project’s deploy flow reads environment variables provided by Railway at runtime. During deployment we clear config/route caches first, so Laravel uses the live DB_* values from Railway before running migrations/seeders. Committing secrets to .env is insecure and can cause cache mismatches on deploys.
+
+What to do instead (MySQL example)
+- In Railway → Your Project → Service “web” → Variables, set:
+  - DB_CONNECTION=mysql
+  - DB_HOST=<db-host>
+  - DB_PORT=3306
+  - DB_DATABASE=<db-name>
+  - DB_USERNAME=<db-user>
+  - DB_PASSWORD=<db-pass>
+- Redeploy the service (Full Rebuild if you recently changed variables).
+- Verify:
+  - Shell: php artisan migrate:status
+  - Connect: mysql -h "$DB_HOST" -P "$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE"
+
+Notes
+- The sample .env in this repo defaults to SQLite for local/demo use. That’s fine locally, but production credentials should live in Railway Variables.
+- For local development against Railway MySQL, you can export DB_* in your terminal session temporarily (do not commit them) and run artisan commands locally.
+- See also:
+  - “Minimal variables to go live” (below)
+  - “How do I migrate and seed MySQL on Railway?”
+  - “Does this auto-setup the database and tables on Railway?”
+
 ## Minimal variables to go live
 Set these first. Replace values in angle brackets.
 
@@ -255,3 +280,43 @@ Use those values with your local client:
 - Wrong DB selected: Ensure DB_CONNECTION and related DB_* envs in the Railway service match your actual DB plugin.
 - SQLite vs Managed DB: If you deployed with default SQLite settings, your data is stored in /app/database/database.sqlite inside the container. Consider switching to a managed DB for durability and easier inspection.
 - Network/SSL errors: Use the exact host/port from Railway and set sslmode=require (Postgres) or enable SSL in your client if the plugin mandates it.
+
+---
+
+## Does this auto-setup the database and tables on Railway?
+
+Short answer: Yes — on each deploy the app will automatically run Laravel migrations and seeders to create/update your tables and insert initial data, as long as your Railway environment variables point to a working database.
+
+What happens automatically on deploy
+- The deploy command in railway.toml runs:
+  - php artisan config:clear && php artisan route:clear
+  - php artisan migrate --force --seed
+  - php artisan config:cache && php artisan route:cache
+- This ensures the DB_* variables from Railway are used, then runs migrations and DatabaseSeeder.
+
+Prerequisites (required for MySQL/Postgres)
+- Set these in Railway → Service “web” → Variables:
+  - DB_CONNECTION=mysql (or pgsql)
+  - DB_HOST, DB_PORT (3306 for MySQL, 5432 for Postgres)
+  - DB_DATABASE, DB_USERNAME, DB_PASSWORD
+- The database itself must already exist (Railway’s managed DB plugins create it for you; external providers must be pre-created). Migrations create tables and indexes but do not create the database schema on the server.
+
+What about SQLite?
+- The sample .env in this repo uses SQLite for local/demo use:
+  - DB_CONNECTION=sqlite
+  - DB_DATABASE=/app/database/database.sqlite
+- On Railway, if you leave it as SQLite, migrations will target the file at /app/database/database.sqlite inside the container. This works for demos but is not recommended for production persistence.
+
+Verifying it worked
+- Railway → Service → web → Shell:
+  - php artisan migrate:status
+  - php artisan tinker → use App\Models\User; User::count();
+- Or connect directly:
+  - MySQL: mysql -h "$DB_HOST" -P "$DB_PORT" -u"$DB_USERNAME" -p"$DB_PASSWORD" "$DB_DATABASE"
+  - Postgres: psql "host=$DB_HOST port=$DB_PORT dbname=$DB_DATABASE user=$DB_USERNAME password=$DB_PASSWORD sslmode=require"
+
+If tables still don’t appear
+- Redeploy the service (Full Rebuild if you recently changed variables).
+- Double-check that your DB_* variables are set on the web service (or project level) and correct for your DB.
+- Review deploy logs for migration errors.
+- Ensure seeders are idempotent to avoid duplicates, since seeding runs after each deploy.

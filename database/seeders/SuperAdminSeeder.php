@@ -13,17 +13,24 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@taskmanager.com',
-            'password' => Hash::make('password123'),
-            'role' => 'super_admin',
-            'phone' => null,
-            'preferred_channel' => 'in_app',
-        ]);
+        // Idempotent seeding: create once if missing (won't duplicate or fail on redeploy)
+        $user = User::firstOrCreate(
+            ['email' => 'superadmin@taskmanager.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password123'),
+                'role' => 'super_admin',
+                'phone' => null,
+                'preferred_channel' => 'in_app',
+            ]
+        );
 
-        $this->command->info('Super Admin created successfully!');
-        $this->command->info('Email: superadmin@taskmanager.com');
-        $this->command->info('Password: password123');
+        if ($user->wasRecentlyCreated) {
+            $this->command->info('Super Admin created successfully!');
+            $this->command->info('Email: superadmin@taskmanager.com');
+            $this->command->info('Password: password123');
+        } else {
+            $this->command->info('Super Admin already exists. Skipping creation.');
+        }
     }
 }
