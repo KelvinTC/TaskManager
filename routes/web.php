@@ -6,6 +6,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 
+// Lightweight health endpoint for platform health checks (no auth, no DB)
+Route::get('/health', function () {
+    return response('OK', 200);
+});
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
