@@ -1,11 +1,15 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import tailwind from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [
+        // Tailwind CSS v4 plugin to process @import 'tailwindcss' and @theme directives
+        tailwind(),
         laravel({
             input: [
+                'resources/css/app.css',
                 'resources/sass/app.scss',
                 'resources/js/app.js',
             ],

@@ -23,8 +23,8 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <!-- Styles & Scripts built by Vite -->
+    @vite(['resources/css/app.css', 'resources/sass/app.scss', 'resources/js/app.js'])
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
