@@ -141,6 +141,7 @@ railway variables set CACHE_DRIVER=redis QUEUE_CONNECTION=redis SESSION_DRIVER=r
 - Mail not sending: verify MAIL_* values and that the provider allows the from address. Use an app password for Gmail/Google Workspace.
 - Queues stuck: make sure you run a worker service: start command `php artisan queue:work --tries=1 --timeout=90` and that Redis vars are set.
 - Time zone warning during deploy: If you see `Unable to load '/usr/share/zoneinfo/tzdata.zi' as time zone. Skipping it.`, the base image is missing tzdata. This repo includes nixpacks.toml to install `tzdata` and sets `TZ=UTC` in railway.toml. Trigger a Full Rebuild to apply.
+- Changed service port on Railway: Railway normally injects an environment variable named `PORT` that the app must bind to. This repo's start command respects `PORT` when present and now falls back to `8081` if it's not set. If you configured your service to expect port 8081, you're covered. If Railway injects a `PORT` (common), that value will still be used regardless of the fallback.
 - Vite/Node build failures: Ensure the Node version is compatible with your Vite version. This project pins `NODE_VERSION=20` in railway.toml variables. Also note `npm ci` requires a package-lock.json; if you remove the lockfile, switch the build step to `npm install --legacy-peer-deps` or restore the lockfile.
 
 ## Related docs in this repo
