@@ -5,6 +5,7 @@ namespace App\Logging;
 use Monolog\Logger;
 use Monolog\Processor\GitProcessor;
 use Monolog\Processor\MercurialProcessor;
+use Monolog\Processor\PsrLogMessageProcessor;
 
 /**
  * Removes VCS-related processors (Git/Mercurial) to avoid
@@ -29,13 +30,12 @@ class DisableGitProcessor
             return;
         }
 
-        // Monolog 2/3 both expose getProcessors()/setProcessors()
-        if (method_exists($logger, 'getProcessors') && method_exists($logger, 'setProcessors')) {
-            $processors = $logger->getProcessors();
-            $processors = array_values(array_filter($processors, function ($p) {
-                return !($p instanceof GitProcessor) && !($p instanceof MercurialProcessor);
-            }));
-            $logger->setProcessors($processors);
+        // Monolog 2/3 both expose getProcessors()/setProcessors().
+        // In some environments, Git/Mercurial processors may be attached early
+        // or by third-party integrations. To be absolutely safe, reset processors
+        // entirely and only keep the minimal PSR message placeholder processor.
+        if (method_exists($logger, 'setProcessors')) {
+            $logger->setProcessors([new PsrLogMessageProcessor()]);
         }
 
         // Best-effort: also scan handlers for attached processors
