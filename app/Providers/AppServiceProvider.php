@@ -49,6 +49,24 @@ class AppServiceProvider extends ServiceProvider
             } catch (\Throwable $e) {
                 // Never break boot due to URL derivation; logs will capture details if needed
             }
+
+            // Harden session cookies for production behind proxies to avoid 419s
+            try {
+                // Ensure cookies are marked secure over HTTPS
+                config(['session.secure' => true]);
+                // Use Lax to allow normal POST redirects after login
+                if (!in_array(config('session.same_site'), ['lax', 'strict', 'none'], true)) {
+                    config(['session.same_site' => 'lax']);
+                }
+                // Avoid mismatched SESSION_DOMAIN from stale env by defaulting to null (current host)
+                // Only override if an explicit valid domain is provided via env at runtime.
+                $envDomain = env('SESSION_DOMAIN');
+                if (empty($envDomain)) {
+                    config(['session.domain' => null]);
+                }
+            } catch (\Throwable $e) {
+                // Do not interrupt boot for session config adjustments
+            }
         }
     }
 }
