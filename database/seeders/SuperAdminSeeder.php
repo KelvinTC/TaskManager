@@ -13,24 +13,34 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Idempotent seeding: create once if missing (won't duplicate or fail on redeploy)
-        $user = User::firstOrCreate(
-            ['email' => 'superadmin@taskmanager.com'],
+        // Configure via env with sensible defaults
+        $email = env('SUPERADMIN_EMAIL', 'superadmin@taskmanager.com');
+        $password = env('SUPERADMIN_PASSWORD', 'password123');
+
+        // Idempotent and self-healing: ensure the Super Admin exists and has a known password
+        $user = User::updateOrCreate(
+            ['email' => $email],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('password123'),
+                // The User model uses the 'hashed' cast so passing a plain password is safe,
+                // but we also explicitly hash here for clarity and compatibility.
+                'password' => Hash::make($password),
                 'role' => 'super_admin',
                 'phone' => null,
                 'preferred_channel' => 'in_app',
+                'email_verified_at' => now(),
             ]
         );
 
-        if ($user->wasRecentlyCreated) {
-            $this->command->info('Super Admin created successfully!');
-            $this->command->info('Email: superadmin@taskmanager.com');
-            $this->command->info('Password: password123');
-        } else {
-            $this->command->info('Super Admin already exists. Skipping creation.');
+        // Output helpful info during seeding
+        if (property_exists($this, 'command') && $this->command) {
+            if ($user->wasRecentlyCreated) {
+                $this->command->info('Super Admin created successfully!');
+            } else {
+                $this->command->info('Super Admin updated successfully!');
+            }
+            $this->command->info('Email: ' . $email);
+            $this->command->info('Password: ' . $password);
         }
     }
 }
