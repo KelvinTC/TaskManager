@@ -13,6 +13,17 @@ Route::get('/health', function () {
     return response('OK', 200);
 });
 
+// Serve favicon explicitly via PHP to avoid proxy/static misrouting causing 502
+Route::get('/favicon.ico', function () {
+    $path = public_path('favicon.ico');
+    if (! file_exists($path)) {
+        return response('', 204);
+    }
+    return response()->file($path, [
+        'Cache-Control' => 'public, max-age=2592000', // 30 days
+    ]);
+});
+
 // On-demand diagnostics endpoint (disabled unless DIAG_TOKEN is set in env)
 if (!empty(env('DIAG_TOKEN'))) {
     Route::get('/diag', function (Request $request) {
