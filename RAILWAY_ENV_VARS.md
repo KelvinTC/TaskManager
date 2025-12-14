@@ -2,7 +2,10 @@
 
 This project is configured to deploy on Railway using the railway.toml at the repo root. Use this guide to set the minimum and recommended environment variables so the app boots correctly in production.
 
-Note: APP_KEY is generated automatically during the build if not present (see railway.toml buildCommand). You can still set your own key if you prefer.
+Important about APP_KEY
+- APP_KEY does not expire. It’s a long‑term secret used by Laravel to encrypt/decrypt cookies, sessions (if encrypted), and data you encrypt via Crypt. Keep it secret and stable.
+- Recommended: Set APP_KEY explicitly in Railway → Variables for your web and worker services. Do not commit it to git.
+- Safety net: This repo includes a runtime safeguard that generates a temporary APP_KEY if one is missing. This is only to prevent boot‑time 500s; you should still set a real APP_KEY in Railway for consistency across replicas and deploys.
 
 ## Where to add variables in Railway
 - Railway → Your Project → Variables
@@ -53,7 +56,43 @@ DB_USERNAME=<db-user>
 DB_PASSWORD=<db-password>
 ```
 
-APP_KEY: Not required to set manually; the build runs `php artisan key:generate --force` if no .env exists. If you want to set it yourself, generate locally (`php artisan key:generate --show`) and paste the value.
+APP_KEY: Strongly recommended to set in Railway Variables. Generate locally with `php artisan key:generate --show` and paste the value. If unset, a temporary key will be generated at runtime by bootstrap/app.php, but that is intended only as a fallback and may invalidate sessions on each deploy.
+
+## FAQ: Does APP_KEY expire?
+Short answer: No. Laravel’s APP_KEY does not expire on its own. It’s a symmetric encryption key (32 bytes, base64‑encoded) used to protect encrypted cookies, certain session data (when SESSION_ENCRYPT=true), and anything you encrypt with Laravel’s Crypt facade. As long as the key remains secret and unchanged, your app will continue to work.
+
+When should I rotate APP_KEY?
+- If you suspect the key was exposed or leaked.
+- If your organization mandates periodic key rotation by policy.
+- If you are moving environments and want to isolate old data from new.
+
+What happens if I change APP_KEY?
+- Existing encrypted cookies become invalid. Users will be logged out and will need to sign in again.
+- Encrypted session data (if SESSION_ENCRYPT=true) will be unreadable and effectively reset.
+- Any data you manually encrypted and stored (e.g., in the database) with the old key will not decrypt with the new key. You must decrypt with the old key and re‑encrypt with the new one as part of your rotation plan.
+- Database contents that are not encrypted (most tables by default) are unaffected.
+- API tokens, passwords, and hashes are unaffected (they do not depend on APP_KEY).
+
+Safe rotation procedure on Railway
+1) Generate a new key locally (or in a secure environment):
+   - php artisan key:generate --show
+   - Copy the full value (including the base64: prefix).
+2) In Railway → Your Project → Variables, update APP_KEY to the new value at the project level (applies to web and worker), or update per service if you prefer.
+3) Redeploy with a Full Rebuild to ensure all replicas use the same new key.
+4) Expect that existing browser sessions are invalidated (users may need to log in again).
+5) If you store application data encrypted with Crypt, plan a maintenance window to re‑encrypt it:
+   - Export/backup the encrypted data.
+   - Temporarily run code that decrypts with the old key and re‑encrypts with the new key, or write a one‑off artisan command to do this.
+   - Only after re‑encryption is complete should you remove access to the old key.
+
+Zero/low‑downtime considerations
+- To avoid user disruption, rotate during low‑traffic hours and announce that sessions will be reset.
+- If you must keep existing encrypted-at-rest data readable during rotation, implement a temporary “dual key” reader that tries the new key first and falls back to the old key, then re‑writes with the new key on save. Remove fallback after migration completes. This requires custom code and careful testing.
+
+Common misconceptions
+- “APP_KEY expires every X days” → False. It never expires automatically.
+- “APP_KEY rotates when I redeploy” → False if you set APP_KEY in Railway Variables. True if you rely on a runtime‑generated fallback, which is why you should set APP_KEY explicitly.
+- “Changing APP_KEY will break my database” → Generally false. Only data you encrypted with Crypt will be affected; normal tables, password hashes, and tokens remain valid.
 
 ## Recommended production variables
 Queues, cache, and sessions should use Redis in production.

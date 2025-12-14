@@ -7,6 +7,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 
 // Lightweight health endpoint for platform health checks (no auth, no DB)
 Route::get('/health', function () {
@@ -36,6 +37,7 @@ if (!empty(env('DIAG_TOKEN'))) {
                 'env' => env('APP_ENV'),
                 'debug' => (bool) env('APP_DEBUG', false),
                 'url' => config('app.url'),
+                'key_set' => (bool) config('app.key'),
             ],
             'health' => 'OK',
             'database' => [
@@ -43,11 +45,38 @@ if (!empty(env('DIAG_TOKEN'))) {
                 'mysql_host' => config('database.connections.mysql.host'),
                 'mysql_db' => config('database.connections.mysql.database'),
             ],
+            'php' => [
+                'version' => PHP_VERSION,
+                'pdo_mysql_loaded' => extension_loaded('pdo_mysql'),
+            ],
+            'session' => [
+                'driver' => config('session.driver'),
+                'cookie' => config('session.cookie'),
+                'path' => config('session.files'),
+            ],
+            'storage' => [
+                'logs_writable' => is_writable(storage_path('logs')),
+                'framework_writable' => is_writable(storage_path('framework')),
+            ],
+            'queue' => [
+                'default' => config('queue.default'),
+            ],
+            'cache' => [
+                'driver' => config('cache.default'),
+            ],
         ];
 
         try {
             DB::connection()->getPdo();
             $data['database']['connected'] = true;
+            // Quick table presence check without throwing
+            try {
+                $data['database']['has_users_table'] = \Illuminate\Support\Facades\Schema::hasTable('users');
+                $data['database']['migrations_table'] = \Illuminate\Support\Facades\Schema::hasTable('migrations');
+            } catch (\Throwable $e) {
+                $data['database']['has_users_table'] = null;
+                $data['database']['migrations_table'] = null;
+            }
         } catch (\Throwable $e) {
             $data['database']['connected'] = false;
             $data['database']['error'] = $e->getMessage();

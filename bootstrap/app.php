@@ -16,6 +16,33 @@ use Illuminate\Http\Request;
  * ensure the directory/file exist.
  */
 try {
+    // Ensure an encryption key exists at runtime to avoid 500s on
+    // encrypted cookies/sessions/config usage if APP_KEY wasn't set.
+    $appKey = getenv('APP_KEY') ?: null;
+    if (!$appKey) {
+        // Generate a random 32-byte key and export as base64:...
+        $random = base64_encode(random_bytes(32));
+        $generated = 'base64:'.$random;
+        putenv('APP_KEY='.$generated);
+        $_ENV['APP_KEY'] = $generated;
+        $_SERVER['APP_KEY'] = $generated;
+    }
+
+    // Ensure critical storage directories exist and are writable
+    $storageDirs = [
+        __DIR__.'/../storage/framework',
+        __DIR__.'/../storage/framework/sessions',
+        __DIR__.'/../storage/framework/cache',
+        __DIR__.'/../storage/framework/views',
+        __DIR__.'/../bootstrap/cache',
+    ];
+    foreach ($storageDirs as $dir) {
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        @chmod($dir, 0775);
+    }
+
     $conn = getenv('DB_CONNECTION') ?: null;
     if ($conn && strtolower($conn) === 'sqlite') {
         $configured = getenv('DB_DATABASE') ?: null;
