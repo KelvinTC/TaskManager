@@ -145,6 +145,58 @@ railway variables set CACHE_DRIVER=redis QUEUE_CONNECTION=redis SESSION_DRIVER=r
 - Vite/Node build failures: Ensure the Node version is compatible with your Vite version. This project pins `NODE_VERSION=20` in railway.toml variables. Also note `npm ci` requires a package-lock.json; if you remove the lockfile, switch the build step to `npm install --legacy-peer-deps` or restore the lockfile.
 - fatal: not a git repository: Some logging stacks add Monolog's GitProcessor which runs `git` commands to include branch/commit in logs. In containers (no .git directory), this prints `fatal: not a git repository`. This repo disables VCS processors by default via a logging tap (App\\Logging\\DisableGitProcessor). If you really need git info in logs, set `LOG_GIT_INFO=true` in Railway Variables. Otherwise, leave it unset/false to avoid the warning.
 
+## How to run queues on Railway (emails & WhatsApp)
+
+This app supports queued jobs for things like emails and WhatsApp notifications. In production you should run a dedicated worker alongside the web service.
+
+What this repo already configures
+- A separate worker service in railway.toml that continuously runs the queue worker:
+  - Command: `php artisan queue:work --tries=3 --timeout=120 --sleep=1 --backoff=3`
+- The web deploy command triggers `php artisan queue:restart` after each deployment so workers gracefully reload fresh code.
+- Default queue driver set to database unless overridden (see config/queue.php and railway.toml variables).
+
+Minimal setup on Railway
+1) Create the worker service
+   - When you push this repo, Railway will show the “web” service automatically.
+   - Add another service from the same repo and select the path `task-scheduling-system` (or use the existing [services.worker] declared in railway.toml if your plan supports multi‑service). The worker’s start command is already defined in railway.toml.
+2) Set Variables (project level or per service)
+   - QUEUE_CONNECTION=database (default in this repo)
+   - DB_* variables pointing to your production database (same ones the web uses)
+   - MAIL_* for emails, and your WhatsApp provider variables (META_* or Twilio) as needed.
+3) Deploy both services
+   - Trigger a Full Rebuild so the image builds once and both services pick it up.
+
+Database vs Redis
+- Database (default): simplest — uses the same DB for the `jobs` and `failed_jobs` tables. Migrations for these tables are included.
+- Redis (recommended for higher throughput): set vars and switch the driver.
+
+Redis example (optional)
+```
+CACHE_DRIVER=redis
+QUEUE_CONNECTION=redis
+SESSION_DRIVER=redis
+REDIS_HOST=<host>
+REDIS_PORT=6379
+REDIS_PASSWORD=<password-if-any>
+```
+
+Verification steps
+- From the web or worker Shell in Railway:
+  - php artisan queue:failed      # list failed jobs
+  - php artisan queue:retry all   # retry if needed
+  - php artisan queue:work --once # run one job immediately (manual test)
+- Trigger a real job from the app (e.g., send a test email or WhatsApp) and watch Logs on the worker service. You should see the job processed.
+
+Operational tips
+- queue:restart is executed automatically after each deploy by the web service, so long‑running workers reload code safely.
+- Increase `--tries` if transient provider errors are common; adjust `--timeout` if your jobs perform network calls that may take longer.
+- For WhatsApp and email providers, confirm credentials/permissions and that your FROM/phone numbers are allowed.
+
+Troubleshooting
+- Jobs remain “pending” and never process: ensure the worker service is running and healthy; check that QUEUE_CONNECTION matches the configured backend and that DB/Redis vars are correct on the worker.
+- SQLSTATE connection errors on worker: copy the same DB_* vars from web into worker, or define them at project level.
+- Mail/WhatsApp send failures: inspect the worker logs for provider error messages (e.g., 401/403). Verify tokens and sender settings.
+
 ### Railway predeploy/start command overrides (very important)
 If you copied commands from a VPS guide (e.g., `git pull`, `sudo systemctl`, `nginx reload`) into Railway’s “Predeploy” or “Start” fields, your deploy will fail. Containers on Railway:
 
