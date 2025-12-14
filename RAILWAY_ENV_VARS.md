@@ -145,6 +145,30 @@ railway variables set CACHE_DRIVER=redis QUEUE_CONNECTION=redis SESSION_DRIVER=r
 - Vite/Node build failures: Ensure the Node version is compatible with your Vite version. This project pins `NODE_VERSION=20` in railway.toml variables. Also note `npm ci` requires a package-lock.json; if you remove the lockfile, switch the build step to `npm install --legacy-peer-deps` or restore the lockfile.
 - fatal: not a git repository: Some logging stacks add Monolog's GitProcessor which runs `git` commands to include branch/commit in logs. In containers (no .git directory), this prints `fatal: not a git repository`. This repo disables VCS processors by default via a logging tap (App\\Logging\\DisableGitProcessor). If you really need git info in logs, set `LOG_GIT_INFO=true` in Railway Variables. Otherwise, leave it unset/false to avoid the warning.
 
+### Railway predeploy/start command overrides (very important)
+If you copied commands from a VPS guide (e.g., `git pull`, `sudo systemctl`, `nginx reload`) into Railway’s “Predeploy” or “Start” fields, your deploy will fail. Containers on Railway:
+
+- Do not have `git` history (no `.git` folder), so `git pull` fails.
+- Do not have `sudo` or `systemd`, so `sudo systemctl ...` fails.
+- Do not use your own nginx/php-fpm service scripts; Nixpacks provisions and starts nginx + PHP-FPM for you.
+
+What to do instead
+- Remove any custom Predeploy/Start commands in the Railway UI for this service.
+- Rely on the repository’s railway.toml:
+  - Build (Nixpacks) handles PHP/Node and Vite.
+  - Deploy command (defined in `[services.web.deploy].command`) runs:
+    - `php artisan config:clear && php artisan route:clear && php artisan migrate --force --seed && php artisan config:cache && php artisan route:cache`
+- The app is served by nginx + PHP-FPM automatically. Do not set a custom `startCommand` unless there is a specific reason.
+
+Checklist to reset to safe defaults
+1. Railway → Service “web” → Settings:
+   - Clear any Predeploy command.
+   - Clear any custom Start command.
+2. Railway → Variables:
+   - Set `APP_KEY` to a valid `base64:` key.
+   - Set DB_* or ensure MYSQL_* vars exist (from the Database plugin).
+3. Redeploy → Full Rebuild.
+
 ## Related docs in this repo
 - WHATSAPP_QUICK_START.md
 - TWILIO_SETUP_CHECKLIST.md
