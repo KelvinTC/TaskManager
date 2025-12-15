@@ -18,29 +18,56 @@ class SuperAdminSeeder extends Seeder
         $password = env('SUPERADMIN_PASSWORD', 'password123');
 
         // Idempotent and self-healing: ensure the Super Admin exists and has a known password
-        $user = User::updateOrCreate(
-            ['email' => $email],
-            [
+        $user = User::where('email', $email)->first();
+
+        $resetOnDeploy = filter_var(env('SUPERADMIN_RESET_ON_DEPLOY', false), FILTER_VALIDATE_BOOL);
+
+        if (! $user) {
+            $user = User::create([
                 'name' => 'Super Admin',
+                'email' => $email,
                 // The User model uses the 'hashed' cast so passing a plain password is safe,
                 // but we also explicitly hash here for clarity and compatibility.
-                'password' => Hash::make($password),
+                'password' => bcrypt($password),
                 'role' => 'super_admin',
                 'phone' => null,
                 'preferred_channel' => 'in_app',
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
 
-        // Output helpful info during seeding
-        if (property_exists($this, 'command') && $this->command) {
-            if ($user->wasRecentlyCreated) {
+            if (property_exists($this, 'command') && $this->command) {
                 $this->command->info('Super Admin created successfully!');
-            } else {
-                $this->command->info('Super Admin updated successfully!');
+                $this->command->info('Email: ' . $email);
+                $this->command->info('Password: ' . $password);
             }
-            $this->command->info('Email: ' . $email);
-            $this->command->info('Password: ' . $password);
+        } else {
+            $updates = [
+                'name' => 'Super Admin',
+                'role' => 'super_admin',
+                'preferred_channel' => 'in_app',
+            ];
+
+            // Only reset password if explicitly requested or if current password isn't a bcrypt hash
+            $current = (string) $user->password;
+            $needsHashFix = !preg_match('/^\$2y\$/', $current);
+            if ($resetOnDeploy || $needsHashFix) {
+                $updates['password'] = Hash::make($password);
+            }
+
+            // Only set email_verified_at if it's currently null
+            if (is_null($user->email_verified_at)) {
+                $updates['email_verified_at'] = now();
+            }
+
+            $user->update($updates);
+
+            if (property_exists($this, 'command') && $this->command) {
+                $this->command->info('Super Admin updated successfully!');
+                $this->command->info('Email: ' . $email);
+                if (array_key_exists('password', $updates)) {
+                    $this->command->info('Password has been reset via seeder.');
+                }
+            }
         }
     }
 }
