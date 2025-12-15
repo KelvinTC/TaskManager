@@ -87,7 +87,27 @@
                                 </li>
                             @endif
                         @else
-                            <li class="nav-item dropdown">
+                            <!-- Visible username chip -->
+                            <li class="nav-item d-none d-md-flex align-items-center me-2">
+                                <span class="navbar-text">
+                                    <i class="bi bi-person-circle"></i>
+                                    {{ Auth::user()->name }}
+                                    <span class="badge bg-primary ms-1">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
+                                </span>
+                            </li>
+
+                            <!-- Non-JS Logout fallback (plain form button) -->
+                            <li class="nav-item d-none d-md-flex">
+                                <form id="logout-form-inline" action="{{ route('logout') }}" method="POST" class="mb-0">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-light btn-sm">
+                                        <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
+                                    </button>
+                                </form>
+                            </li>
+
+                            <!-- Dropdown with extra links for all screen sizes -->
+                            <li class="nav-item dropdown d-md-none">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
                                     <span class="badge bg-primary">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
@@ -99,8 +119,7 @@
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
+                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
                                     </a>
 

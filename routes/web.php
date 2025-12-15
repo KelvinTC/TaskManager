@@ -92,7 +92,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::middleware(['auth'])->group(function () {
+// Ensure the 'web' middleware is applied so sessions/auth state are available
+Route::middleware(['web','auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
@@ -128,3 +129,43 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/users/{user}/demote', [UserManagementController::class, 'demoteToEmployee'])->name('users.demote');
     });
 });
+
+// Queue diagnostics (behind DIAG_TOKEN)
+if (!empty(env('DIAG_TOKEN'))) {
+    Route::get('/queue/health', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $connection = config('queue.default');
+        $summary = [
+            'connection' => $connection,
+            'jobs_table_exists' => \Illuminate\Support\Facades\Schema::hasTable('jobs'),
+            'failed_jobs_table_exists' => \Illuminate\Support\Facades\Schema::hasTable('failed_jobs'),
+        ];
+
+        try {
+            $summary['pending_jobs'] = \Illuminate\Support\Facades\DB::table('jobs')->count();
+        } catch (\Throwable $e) {
+            $summary['pending_jobs'] = null;
+        }
+        try {
+            $summary['failed_jobs'] = \Illuminate\Support\Facades\DB::table('failed_jobs')->count();
+        } catch (\Throwable $e) {
+            $summary['failed_jobs'] = null;
+        }
+
+        $summary['last_ping'] = \Illuminate\Support\Facades\Cache::get('queue:last_ping');
+
+        // Optionally dispatch a quick ping job to update last_ping
+        try {
+            dispatch(new \App\Jobs\QueuePing());
+            $summary['ping_dispatched'] = true;
+        } catch (\Throwable $e) {
+            $summary['ping_dispatched'] = false;
+            $summary['dispatch_error'] = $e->getMessage();
+        }
+
+        return response()->json($summary);
+    });
+}
