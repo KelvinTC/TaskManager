@@ -66,14 +66,24 @@ class LoginController extends Controller
                     if (hash_equals($stored, (string) $plain)) {
                         $user->password = bcrypt($plain);
                         $user->save();
+                    } else {
+                        // For non-bcrypt, non-matching legacy values, avoid calling guard()->attempt
+                        // because the hasher will throw a RuntimeException. Fail authentication cleanly.
+                        return false;
                     }
                 }
             }
         }
 
-        return $this->guard()->attempt(
-            $credentials,
-            $request->boolean('remember')
-        );
+        try {
+            return $this->guard()->attempt(
+                $credentials,
+                $request->boolean('remember')
+            );
+        } catch (\RuntimeException $e) {
+            // Gracefully handle unexpected hasher errors (e.g., unsupported legacy hashes)
+            report($e);
+            return false;
+        }
     }
 }
