@@ -5,7 +5,10 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "start": "vite preview"
+        "start": "vite preview",
+        "dev:app": "php artisan serve --host=127.0.0.1 --port=8004",
+        "dev:worker": "php artisan queue:work --tries=3 --timeout=120 --sleep=1 --backoff=3",
+        "dev:full": "concurrently -n APP,VITE,WORKER -c green,cyan,magenta \"npm:dev:app\" \"npm:dev\" \"npm:dev:worker\""
     },
 
     "devDependencies": {

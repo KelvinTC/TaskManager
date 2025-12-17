@@ -1,0 +1,22 @@
+[phases.setup]
+nixPkgs = ['php83', 'php83Packages.composer', 'nodejs_20', 'tzdata']
+
+[phases.install]
+cmds = [
+    'composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader',
+    'npm ci'
+]
+
+[phases.build]
+cmds = [
+    'npm run build',
+    'php artisan config:clear',
+    'php artisan route:clear'
+]
+
+[start]
+cmd = 'php artisan serve --host=0.0.0.0 --port=${PORT:-8081}'
+
+[variables]
+NODE_VERSION = '20'
+TZ = 'UTC'
