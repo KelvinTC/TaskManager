@@ -90,6 +90,11 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Temporary asset diagnostic route
+Route::get('/test-assets', function () {
+    return view('test-assets');
+});
+
 Auth::routes();
 
 // Ensure the 'web' middleware is applied so sessions/auth state are available
