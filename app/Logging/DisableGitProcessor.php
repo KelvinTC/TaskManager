@@ -19,10 +19,10 @@ class DisableGitProcessor
     /**
      * Invoked by Laravel's logging "tap" feature.
      *
-     * @param \Monolog\Logger $logger
+     * @param \Illuminate\Log\Logger|\Monolog\Logger $logger
      * @return void
      */
-    public function __invoke(Logger $logger): void
+    public function __invoke($logger): void
     {
         // Allow opting in explicitly
         $enabled = filter_var((string) env('LOG_GIT_INFO', false), FILTER_VALIDATE_BOOLEAN);

@@ -16,17 +16,9 @@ use Illuminate\Http\Request;
  * ensure the directory/file exist.
  */
 try {
-    // Ensure an encryption key exists at runtime to avoid 500s on
-    // encrypted cookies/sessions/config usage if APP_KEY wasn't set.
-    $appKey = getenv('APP_KEY') ?: null;
-    if (!$appKey) {
-        // Generate a random 32-byte key and export as base64:...
-        $random = base64_encode(random_bytes(32));
-        $generated = 'base64:'.$random;
-        putenv('APP_KEY='.$generated);
-        $_ENV['APP_KEY'] = $generated;
-        $_SERVER['APP_KEY'] = $generated;
-    }
+    // NOTE: APP_KEY generation removed - must be set in .env file
+    // Auto-generating keys was causing CSRF validation failures due to
+    // key mismatches between requests. Always use a fixed key in .env.
 
     // Ensure critical storage directories exist and are writable
     $storageDirs = [
@@ -80,12 +72,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Trust Railway / reverse proxy headers so scheme/host/port are correct
-        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR
-            | Request::HEADER_X_FORWARDED_HOST
-            | Request::HEADER_X_FORWARDED_PORT
-            | Request::HEADER_X_FORWARDED_PROTO
-            | Request::HEADER_X_FORWARDED_AWS_ELB);
+        // Proxy trust disabled for local testing
+        // TODO: Re-enable for production deployment
+        // $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR
+        //     | Request::HEADER_X_FORWARDED_HOST
+        //     | Request::HEADER_X_FORWARDED_PORT
+        //     | Request::HEADER_X_FORWARDED_PROTO
+        //     | Request::HEADER_X_FORWARDED_AWS_ELB);
 
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,

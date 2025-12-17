@@ -31,11 +31,33 @@
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{{ url('/') }}">
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url('/') }}" style="color: #1e40af; font-weight: 600;">
                     <i class="bi bi-kanban"></i> {{ config('app.name', 'Task Manager') }}
                 </a>
+
+                @auth
+                <!-- User Controls - Always Visible -->
+                <div class="d-flex align-items-center gap-2 order-md-3">
+                    <!-- Dark Mode Toggle -->
+                    <button class="btn btn-outline-secondary dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode" style="border-radius: 50px; padding: 0.35rem 0.75rem;">
+                        <span class="toggle-icon">
+                            <i class="bi bi-sun-fill"></i>
+                        </span>
+                    </button>
+
+                    <!-- Logout Button -->
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-primary logout-btn" title="Logout" style="border-radius: 6px; padding: 0.4rem 1rem; font-weight: 500;">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-md-inline ms-1">Logout</span>
+                        </button>
+                    </form>
+                </div>
+                @endauth
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -64,69 +86,11 @@
                         @endauth
                     </ul>
 
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ms-auto align-items-center">
-                        <!-- Dark Mode Toggle -->
-                        <li class="nav-item me-3">
-                            <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
-                                <span class="toggle-icon">
-                                    <i class="bi bi-sun-fill"></i>
-                                </span>
-                            </button>
-                        </li>
-
-                        <!-- Authentication Links -->
+                    <!-- Right Side Of Navbar (Guest Only) -->
+                    <ul class="navbar-nav ms-auto">
                         @guest
-                            <!-- Always show Login link for guests; avoid hiding it behind Route::has in production -->
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                            </li>
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        @else
-                            <!-- Visible username chip -->
-                            <li class="nav-item d-none d-md-flex align-items-center me-2">
-                                <span class="navbar-text">
-                                    <i class="bi bi-person-circle"></i>
-                                    {{ Auth::user()->name }}
-                                    <span class="badge bg-primary ms-1">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
-                                </span>
-                            </li>
-
-                            <!-- Non-JS Logout fallback (plain form button) -->
-                            <li class="nav-item d-none d-md-flex">
-                                <form id="logout-form-inline" action="{{ route('logout') }}" method="POST" class="mb-0">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-light btn-sm">
-                                        <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
-                                    </button>
-                                </form>
-                            </li>
-
-                            <!-- Dropdown with extra links for all screen sizes -->
-                            <li class="nav-item dropdown d-md-none">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    <i class="bi bi-person-circle"></i> {{ Auth::user()->name }}
-                                    <span class="badge bg-primary">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
-                                </a>
-
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('dashboard') }}">
-                                        <i class="bi bi-speedometer2"></i> Dashboard
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}
-                                    </a>
-
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </div>
                             </li>
                         @endguest
                     </ul>

@@ -95,6 +95,20 @@ Route::get('/test-assets', function () {
     return view('test-assets');
 });
 
+// CSRF Test Route
+Route::get('/test-csrf', function () {
+    return response()->json([
+        'session_id' => session()->getId(),
+        'csrf_token' => csrf_token(),
+        'session_token' => session()->token(),
+        'cookies' => request()->cookies->all(),
+    ]);
+});
+
+Route::post('/test-csrf', function () {
+    return response()->json(['success' => true, 'message' => 'CSRF validation passed!']);
+});
+
 Auth::routes();
 
 // Ensure the 'web' middleware is applied so sessions/auth state are available
