@@ -78,7 +78,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="6" class="text-center py-4">
-                                            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                                            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
                                             <p class="text-muted mt-2">No tasks found.</p>
                                             @if(Auth::user()->canCreateTasks())
                                                 <a href="{{ route('tasks.create') }}" class="btn btn-primary">Create Your First Task</a>

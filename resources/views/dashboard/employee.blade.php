@@ -8,8 +8,8 @@
             <div class="col-12 col-md-8 mb-3 mb-md-0">
                 <h2 class="mb-0">
                     <i class="bi bi-person-badge"></i>
-                    <span class="d-none d-sm-inline">Employee Dashboard</span>
-                    <span class="d-inline d-sm-none">Dashboard</span>
+                    <span class="d-none d-sm-inline">Welcome, {{ Auth::user()->name }}</span>
+                    <span class="d-inline d-sm-none">Welcome</span>
                 </h2>
                 <p class="text-muted mb-0 mt-2 d-none d-sm-block">Track your assigned tasks and performance.</p>
             </div>

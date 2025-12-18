@@ -641,6 +641,18 @@ h6 { font-size: 0.875rem; }
     color: white !important;
 }
 
+/* Override text-dark and text-white classes in card headers */
+[data-theme="dark"] .card-header.bg-warning.text-dark,
+[data-theme="dark"] .card-header.bg-warning .text-dark,
+[data-theme="dark"] .card-header.bg-warning * {
+    color: white !important;
+}
+
+[data-theme="dark"] .card-header.bg-primary.text-white,
+[data-theme="dark"] .card-header.bg-primary * {
+    color: white !important;
+}
+
 [data-theme="dark"] .table thead th {
     background-color: #1e293b;
     color: #f9fafb !important;
@@ -1351,4 +1363,136 @@ body,
     .container {
         max-width: 1320px;
     }
+}
+
+/* ============================================
+   EMPTY STATES - DARK MODE FIX
+   ============================================ */
+
+/* Ensure empty state containers have proper dark backgrounds */
+[data-theme="dark"] .card-body .text-center {
+    background-color: transparent !important;
+}
+
+/* Empty state icons in dark mode - make them more visible */
+[data-theme="dark"] .text-center i.text-muted {
+    color: #9ca3af !important;
+    opacity: 1 !important;
+}
+
+/* Empty state text in dark mode */
+[data-theme="dark"] .text-center .text-muted {
+    color: #d1d5db !important;
+}
+
+/* Specific fix for badges with bg-light in dark mode */
+[data-theme="dark"] .badge.bg-light {
+    background-color: #374151 !important;
+    color: #f3f4f6 !important;
+}
+
+/* Fix bg-light sections in dark mode (like statistics cards) */
+[data-theme="dark"] .bg-light {
+    background-color: #374151 !important;
+}
+
+[data-theme="dark"] .bg-light h4,
+[data-theme="dark"] .bg-light small,
+[data-theme="dark"] .bg-light * {
+    color: #f3f4f6 !important;
+}
+
+/* ============================================
+   USER MANAGEMENT TABLES - DARK MODE
+   ============================================ */
+
+/* Force all table cells to be visible in dark mode */
+[data-theme="dark"] .table-responsive table,
+[data-theme="dark"] .table-responsive table *,
+[data-theme="dark"] .table-hover tbody tr td,
+[data-theme="dark"] .table tbody tr td {
+    color: #f3f4f6 !important;
+    background-color: transparent !important;
+}
+
+/* Table rows background in dark mode */
+[data-theme="dark"] .table tbody tr {
+    background-color: transparent !important;
+}
+
+[data-theme="dark"] .table tbody tr:hover {
+    background-color: #374151 !important;
+}
+
+/* Ensure badges remain visible */
+[data-theme="dark"] .table .badge {
+    color: #ffffff !important;
+}
+
+/* Buttons in tables */
+[data-theme="dark"] .table .btn {
+    color: #ffffff !important;
+}
+
+/* ============================================
+   BUTTONS - ENHANCED DARK MODE VISIBILITY
+   ============================================ */
+
+/* Ensure all button text and icons are visible */
+[data-theme="dark"] .btn,
+[data-theme="dark"] .btn *,
+[data-theme="dark"] .btn i {
+    color: #ffffff !important;
+}
+
+/* Primary buttons - bright and visible */
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-primary *,
+[data-theme="dark"] .btn-primary i {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+}
+
+/* Large buttons */
+[data-theme="dark"] .btn-lg,
+[data-theme="dark"] .btn-lg *,
+[data-theme="dark"] .btn-lg i {
+    color: #ffffff !important;
+}
+
+/* Outline buttons */
+[data-theme="dark"] .btn-outline-primary {
+    color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-outline-info {
+    color: #0ea5e9 !important;
+    border-color: #0ea5e9 !important;
+}
+
+[data-theme="dark"] .btn-outline-info:hover {
+    background-color: #0ea5e9 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-outline-success {
+    color: #10b981 !important;
+    border-color: #10b981 !important;
+}
+
+[data-theme="dark"] .btn-outline-success:hover {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
 }

@@ -27,7 +27,7 @@
     @vite(['resources/css/app.css', 'resources/sass/app.scss', 'resources/js/app.js'])
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}?v={{ time() }}">
 </head>
 <body>
     <div id="app">

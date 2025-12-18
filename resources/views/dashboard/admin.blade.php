@@ -8,8 +8,8 @@
             <div class="col-12 col-md-8 mb-3 mb-md-0">
                 <h2 class="mb-0">
                     <i class="bi bi-shield-check"></i>
-                    <span class="d-none d-sm-inline">{{ Auth::user()->isSuperAdmin() ? 'Super Admin' : 'Admin' }} Dashboard</span>
-                    <span class="d-inline d-sm-none">Dashboard</span>
+                    <span class="d-none d-sm-inline">Welcome, {{ Auth::user()->name }}</span>
+                    <span class="d-inline d-sm-none">Welcome</span>
                 </h2>
                 <p class="text-muted mb-0 mt-2 d-none d-sm-block">Welcome back! Here's what's happening with your tasks today.</p>
             </div>
@@ -58,12 +58,7 @@
         <div class="col-lg-8 mb-4">
             <div class="card hover-lift">
                 <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-clock"></i> Recent Tasks</h5>
-                        <a href="{{ route('tasks.create') }}" class="btn btn-sm btn-light">
-                            <i class="bi bi-plus"></i> New Task
-                        </a>
-                    </div>
+                    <h5 class="mb-0"><i class="bi bi-clock"></i> Recent Tasks</h5>
                 </div>
                 <div class="card-body">
                     <div class="list-group list-group-flush">
