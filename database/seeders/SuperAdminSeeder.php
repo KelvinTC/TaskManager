@@ -26,9 +26,8 @@ class SuperAdminSeeder extends Seeder
             $user = User::create([
                 'name' => 'Super Admin',
                 'email' => $email,
-                // The User model uses the 'hashed' cast so passing a plain password is safe,
-                // but we also explicitly hash here for clarity and compatibility.
-                'password' => bcrypt($password),
+                // The User model uses the 'hashed' cast so pass plain password
+                'password' => $password,
                 'role' => 'super_admin',
                 'phone' => null,
                 'preferred_channel' => 'in_app',
@@ -51,7 +50,8 @@ class SuperAdminSeeder extends Seeder
             $current = (string) $user->password;
             $needsHashFix = !preg_match('/^\$2y\$/', $current);
             if ($resetOnDeploy || $needsHashFix) {
-                $updates['password'] = Hash::make($password);
+                // The User model uses the 'hashed' cast so pass plain password
+                $updates['password'] = $password;
             }
 
             // Only set email_verified_at if it's currently null
