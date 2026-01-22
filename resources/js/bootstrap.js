@@ -7,9 +7,24 @@ import 'bootstrap';
  */
 
 import axios from 'axios';
-window.axios = axios;
 
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+// Configure axios defaults without assigning to window (fixes XrayWrapper error)
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// Only expose to window in a safe way for development
+if (typeof window !== 'undefined') {
+    try {
+        // Use Object.defineProperty to avoid cross-origin issues
+        Object.defineProperty(window, 'axios', {
+            value: axios,
+            writable: false,
+            configurable: false
+        });
+    } catch (e) {
+        // Silently fail in strict security contexts (like Railway deployment)
+        console.warn('Could not attach axios to window object');
+    }
+}
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
