@@ -12,7 +12,7 @@ class CreateSuperAdmin extends Command
 
     public function handle()
     {
-        $email = 'admin';
+        $email = 'admin@tm.com';
         $password = 'password@1';
 
         $this->info('Creating/updating superadmin user...');
