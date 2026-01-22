@@ -32,9 +32,9 @@ php artisan view:clear
 echo "🗄️ Running migrations..."
 php artisan migrate --force
 
-# Check if superadmin exists, if not seed it
-echo "👤 Checking for superadmin..."
-php artisan db:seed --force --class=SuperAdminSeeder
+# Create superadmin user with hardcoded credentials
+echo "👤 Creating superadmin user..."
+php artisan superadmin:create
 
 # Cache config and routes
 echo "⚡ Caching configuration..."
