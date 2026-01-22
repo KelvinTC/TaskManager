@@ -12,8 +12,8 @@ class CreateSuperAdmin extends Command
 
     public function handle()
     {
-        $email = 'superadmin@taskmanager.com';
-        $password = 'password123';
+        $email = 'admin';
+        $password = 'password@1';
 
         $this->info('Creating/updating superadmin user...');
 
