@@ -72,12 +72,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Trust proxies in production (Railway, etc.)
+        // Trust all proxies in production (Railway uses proxies)
         $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR
             | Request::HEADER_X_FORWARDED_HOST
             | Request::HEADER_X_FORWARDED_PORT
             | Request::HEADER_X_FORWARDED_PROTO
             | Request::HEADER_X_FORWARDED_AWS_ELB);
+
+        // Ensure CSRF tokens work with proxied requests
+        $middleware->validateCsrfTokens(except: []);
 
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
