@@ -12,10 +12,12 @@ class CreateSuperAdmin extends Command
 
     public function handle()
     {
-        $email = 'admin@tm.com';
-        $password = 'password@1';
+        // Use environment variables with fallback to hardcoded defaults
+        $email = env('SUPERADMIN_EMAIL', 'admin@tm.com');
+        $password = env('SUPERADMIN_PASSWORD', 'password@1');
 
         $this->info('Creating/updating superadmin user...');
+        $this->info('Using email: ' . $email);
 
         // Delete existing superadmin if exists
         User::where('email', $email)->delete();

@@ -32,8 +32,9 @@ php artisan view:clear
 echo "🗄️ Running migrations..."
 php artisan migrate --force
 
-# Create superadmin user with hardcoded credentials
+# Create superadmin user using environment variables
 echo "👤 Creating superadmin user..."
+echo "📧 Using credentials from env: ${SUPERADMIN_EMAIL:-admin@tm.com}"
 php artisan superadmin:create || {
     echo "❌ Failed to create superadmin user!"
     exit 1
@@ -41,8 +42,9 @@ php artisan superadmin:create || {
 
 # Verify user exists in database
 echo "🔍 Verifying superadmin exists in database..."
+SUPERADMIN_EMAIL_CHECK="${SUPERADMIN_EMAIL:-admin@tm.com}"
 php artisan tinker --execute="
-\$user = \App\Models\User::where('email', 'admin@tm.com')->first();
+\$user = \App\Models\User::where('email', '${SUPERADMIN_EMAIL_CHECK}')->first();
 if (\$user) {
     echo '✅ User found: ' . \$user->email . ' (ID: ' . \$user->id . ')' . PHP_EOL;
 } else {
