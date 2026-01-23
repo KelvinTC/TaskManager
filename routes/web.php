@@ -94,6 +94,7 @@ if (!empty(env('DIAG_TOKEN'))) {
         $expectedEmail = env('SUPERADMIN_EMAIL', 'admin@tm.com');
         $expectedPassword = env('SUPERADMIN_PASSWORD', 'password@1');
         $fix = $request->query('fix') === 'true';
+        $create = $request->query('create') === 'true';
 
         $data = [
             'expected_credentials' => [
@@ -104,6 +105,7 @@ if (!empty(env('DIAG_TOKEN'))) {
             'superadmin_check' => null,
             'password_check' => null,
             'fixed' => false,
+            'created' => false,
         ];
 
         try {
@@ -121,6 +123,22 @@ if (!empty(env('DIAG_TOKEN'))) {
 
             // Check superadmin user
             $superadmin = \App\Models\User::where('email', $expectedEmail)->first();
+
+            // Create user if requested and doesn't exist
+            if ($create && !$superadmin) {
+                $superadmin = \App\Models\User::create([
+                    'name' => 'Super Admin',
+                    'email' => $expectedEmail,
+                    'password' => $expectedPassword,
+                    'role' => 'super_admin',
+                    'phone' => null,
+                    'preferred_channel' => 'in_app',
+                    'email_verified_at' => now(),
+                ]);
+                $data['created'] = true;
+                $data['message'] = 'Superadmin user created successfully!';
+            }
+
             if ($superadmin) {
                 $data['superadmin_check'] = [
                     'found' => true,
@@ -147,11 +165,12 @@ if (!empty(env('DIAG_TOKEN'))) {
             } else {
                 $data['superadmin_check'] = [
                     'found' => false,
-                    'message' => 'User not found. Run: php artisan superadmin:create',
+                    'message' => 'User not found. Add &create=true to create the user.',
                 ];
             }
         } catch (\Throwable $e) {
             $data['error'] = $e->getMessage();
+            $data['trace'] = $e->getTraceAsString();
         }
 
         return response()->json($data);
