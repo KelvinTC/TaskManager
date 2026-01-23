@@ -84,6 +84,78 @@ if (!empty(env('DIAG_TOKEN'))) {
 
         return response()->json($data);
     });
+
+    // User diagnostic and fix endpoint
+    Route::get('/diag/users', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $expectedEmail = env('SUPERADMIN_EMAIL', 'admin@tm.com');
+        $expectedPassword = env('SUPERADMIN_PASSWORD', 'password@1');
+        $fix = $request->query('fix') === 'true';
+
+        $data = [
+            'expected_credentials' => [
+                'email' => $expectedEmail,
+                'password' => $expectedPassword,
+            ],
+            'all_users' => [],
+            'superadmin_check' => null,
+            'password_check' => null,
+            'fixed' => false,
+        ];
+
+        try {
+            // Get all users
+            $users = \App\Models\User::all();
+            foreach ($users as $user) {
+                $data['all_users'][] = [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'password_hash_start' => substr($user->password, 0, 10),
+                    'is_bcrypt' => str_starts_with($user->password, '$2y$'),
+                ];
+            }
+
+            // Check superadmin user
+            $superadmin = \App\Models\User::where('email', $expectedEmail)->first();
+            if ($superadmin) {
+                $data['superadmin_check'] = [
+                    'found' => true,
+                    'id' => $superadmin->id,
+                    'email' => $superadmin->email,
+                    'role' => $superadmin->role,
+                    'is_bcrypt_hashed' => str_starts_with($superadmin->password, '$2y$'),
+                ];
+
+                // Test password
+                $passwordMatches = \Illuminate\Support\Facades\Hash::check($expectedPassword, $superadmin->password);
+                $data['password_check'] = [
+                    'matches' => $passwordMatches,
+                    'hash_start' => substr($superadmin->password, 0, 30),
+                ];
+
+                // Fix if requested
+                if ($fix && !$passwordMatches) {
+                    $superadmin->password = \Illuminate\Support\Facades\Hash::make($expectedPassword);
+                    $superadmin->save();
+                    $data['fixed'] = true;
+                    $data['message'] = 'Password has been reset to: ' . $expectedPassword;
+                }
+            } else {
+                $data['superadmin_check'] = [
+                    'found' => false,
+                    'message' => 'User not found. Run: php artisan superadmin:create',
+                ];
+            }
+        } catch (\Throwable $e) {
+            $data['error'] = $e->getMessage();
+        }
+
+        return response()->json($data);
+    });
 }
 
 Route::get('/', function () {
