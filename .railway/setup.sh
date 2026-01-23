@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex  # Exit on error AND print each command
 
 echo "🚀 Railway Deployment Setup"
 
@@ -34,7 +34,25 @@ php artisan migrate --force
 
 # Create superadmin user with hardcoded credentials
 echo "👤 Creating superadmin user..."
-php artisan superadmin:create
+php artisan superadmin:create || {
+    echo "❌ Failed to create superadmin user!"
+    exit 1
+}
+
+# Verify user exists in database
+echo "🔍 Verifying superadmin exists in database..."
+php artisan tinker --execute="
+\$user = \App\Models\User::where('email', 'admin@tm.com')->first();
+if (\$user) {
+    echo '✅ User found: ' . \$user->email . ' (ID: ' . \$user->id . ')' . PHP_EOL;
+} else {
+    echo '❌ ERROR: User NOT found in database!' . PHP_EOL;
+    exit(1);
+}
+" || {
+    echo "❌ User verification failed!"
+    exit 1
+}
 
 # Cache config and routes
 echo "⚡ Caching configuration..."
