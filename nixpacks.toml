@@ -1,13 +1,5 @@
 [phases.setup]
 nixPkgs = ["tzdata"]
 
-[phases.install]
-cmds = [
-    "mkdir -p /app/storage/database",
-    "mkdir -p /app/storage/framework/{cache,sessions,views}",
-    "mkdir -p /app/storage/logs",
-    "mkdir -p /app/bootstrap/cache"
-]
-
 [start]
-cmd = "bash -c 'chmod +x .railway/setup.sh && ./.railway/setup.sh && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}'"
+cmd = "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
