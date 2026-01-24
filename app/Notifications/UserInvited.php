@@ -62,7 +62,7 @@ class UserInvited extends Notification implements ShouldQueue
         $appName = config('app.name', 'Task Manager');
         $registerUrl = url('/register?phone=' . urlencode($this->invitedUserPhone));
 
-        return "🎉 *Welcome to {$appName}!*\n\n" .
+        return "*Welcome to {$appName}!*\n\n" .
                "You have been invited by *{$this->invitedByName}*\n\n" .
                "👉 Please complete your registration:\n" .
                "{$registerUrl}\n\n";
