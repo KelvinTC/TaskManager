@@ -42,6 +42,27 @@ class RegisterController extends Controller
     }
 
     /**
+     * Show the registration form with pre-filled data if invited.
+     */
+    public function showRegistrationForm(\Illuminate\Http\Request $request)
+    {
+        $phone = $request->query('phone');
+        $invitedEmail = null;
+
+        if ($phone) {
+            $invited = InvitedUser::where('phone_number', $phone)
+                ->where('registered', false)
+                ->first();
+
+            if ($invited) {
+                $invitedEmail = $invited->email;
+            }
+        }
+
+        return view('auth.register', compact('phone', 'invitedEmail'));
+    }
+
+    /**
      * Get a validator for an incoming registration request.
      *
      * @param  array  $data
@@ -51,24 +72,23 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
+            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => [
                 'required',
                 'string',
-                'email',
-                'max:255',
+                'max:20',
                 'unique:users',
                 function ($attribute, $value, $fail) {
-                    $invited = InvitedUser::where('email', $value)
+                    $invited = InvitedUser::where('phone_number', $value)
                         ->where('registered', false)
                         ->first();
 
                     if (!$invited) {
-                        $fail('This email has not been invited to register. Please contact the administrator.');
+                        $fail('This phone number has not been invited to register. Please contact the administrator.');
                     }
                 }
             ],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone' => ['nullable', 'string', 'max:20'],
         ]);
     }
 
@@ -80,25 +100,22 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        // Get the invited user record
-        $invited = InvitedUser::where('email', $data['email'])
+        // Get the invited user record by phone number
+        $invited = InvitedUser::where('phone_number', $data['phone'])
             ->where('registered', false)
             ->first();
 
-        // Use phone from registration form, or fall back to invited user's phone
-        $phone = $data['phone'] ?? $invited->phone_number;
-
-        // Set preferred channel to whatsapp if phone is provided
-        $preferredChannel = !empty($phone) ? 'whatsapp' : 'in_app';
+        // Use email from registration form, or fall back to invited user's email
+        $email = $data['email'] ?? $invited->email;
 
         // Create the user with the role from the invitation
         $user = User::create([
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => $email,
             'password' => Hash::make($data['password']),
-            'phone' => $phone,
+            'phone' => $data['phone'],
             'role' => $invited->role,
-            'preferred_channel' => $preferredChannel,
+            'preferred_channel' => 'whatsapp', // Always WhatsApp since phone is required
         ]);
 
         // Mark the invitation as registered

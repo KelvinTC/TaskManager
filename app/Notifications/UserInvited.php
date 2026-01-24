@@ -40,6 +40,8 @@ class UserInvited extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
+        $registerUrl = url('/register?phone=' . urlencode($this->invitedUserPhone));
+
         return (new MailMessage)
             ->from(
                 config('mail.invite.address', config('mail.from.address')),
@@ -49,24 +51,23 @@ class UserInvited extends Notification implements ShouldQueue
             ->greeting('Hello!')
             ->line('You have been invited to join Task Manager by ' . $this->invitedByName . '.')
             ->line('Role: ' . ucfirst(str_replace('_', ' ', $this->role)))
-            ->line('Email: ' . $this->invitedUserEmail)
-            ->action('Register Now', url('/register'))
-            ->line('Please register with the email address: ' . $this->invitedUserEmail)
+            ->line('Phone: ' . $this->invitedUserPhone)
+            ->action('Register Now', $registerUrl)
+            ->line('Please register using your phone number: ' . $this->invitedUserPhone)
             ->line('Thank you for joining our team!');
     }
 
     public function toWhatsapp($notifiable)
     {
         $appName = config('app.name', 'Task Manager');
-        $registerUrl = url('/register');
+        $registerUrl = url('/register?phone=' . urlencode($this->invitedUserPhone));
 
         return "🎉 *Welcome to {$appName}!*\n\n" .
                "You have been invited by *{$this->invitedByName}*\n\n" .
                "📋 *Role:* " . ucfirst(str_replace('_', ' ', $this->role)) . "\n" .
-               "📧 *Email:* {$this->invitedUserEmail}\n\n" .
+               "📱 *Phone:* {$this->invitedUserPhone}\n\n" .
                "👉 Please complete your registration:\n" .
                "{$registerUrl}\n\n" .
-               "⚠️ *Important:* Use the email address *{$this->invitedUserEmail}* when registering.\n\n" .
-               "Welcome to the team! 🚀";
+               "⚠️ Use your phone number *{$this->invitedUserPhone}* when registering.";
     }
 }
