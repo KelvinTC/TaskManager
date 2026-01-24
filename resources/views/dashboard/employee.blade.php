@@ -23,43 +23,34 @@
 
     <!-- Stats Cards -->
     <div class="row mb-4">
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+        <div class="col-6 col-md-3 mb-3">
             <div class="card text-center shadow-sm h-100">
                 <div class="card-body">
                     <i class="bi bi-list-check text-primary" style="font-size: 2rem;"></i>
                     <h3 class="text-primary mb-0 mt-2">{{ $stats['total_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Total Tasks</p>
+                    <p class="mb-0 small text-muted">Total</p>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-clock-history text-warning" style="font-size: 2rem;"></i>
-                    <h3 class="text-warning mb-0 mt-2">{{ $stats['pending_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Pending</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+        <div class="col-6 col-md-3 mb-3">
             <div class="card text-center shadow-sm h-100">
                 <div class="card-body">
                     <i class="bi bi-arrow-repeat text-info" style="font-size: 2rem;"></i>
                     <h3 class="text-info mb-0 mt-2">{{ $stats['in_progress_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">In Progress</p>
+                    <p class="mb-0 small text-muted">Active</p>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+        <div class="col-6 col-md-3 mb-3">
             <div class="card text-center shadow-sm h-100">
                 <div class="card-body">
                     <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
                     <h3 class="text-success mb-0 mt-2">{{ $stats['completed_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Completed</p>
+                    <p class="mb-0 small text-muted">Done</p>
                 </div>
             </div>
         </div>
-        <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
+        <div class="col-6 col-md-3 mb-3">
             <div class="card text-center shadow-sm h-100">
                 <div class="card-body">
                     <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2rem;"></i>
@@ -74,7 +65,7 @@
         <!-- Recent Tasks -->
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-clock"></i> Recent Tasks</h5>
                 </div>
                 <div class="card-body">
@@ -119,7 +110,7 @@
         <!-- Upcoming Tasks -->
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm h-100">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-calendar3"></i> Upcoming Tasks</h5>
                 </div>
                 <div class="card-body">
@@ -162,7 +153,7 @@
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Tasks by Priority</h5>
                 </div>
                 <div class="card-body">
@@ -192,27 +183,12 @@
 
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Task Statistics</h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('tasks.index') }}" class="btn btn-outline-primary btn-lg">
-                            <i class="bi bi-list-task"></i> View All My Tasks
-                        </a>
-                        <a href="{{ route('calendar') }}" class="btn btn-outline-info btn-lg">
-                            <i class="bi bi-calendar3"></i> View Calendar
-                        </a>
-                        <a href="{{ route('reports.time-based') }}" class="btn btn-outline-success btn-lg">
-                            <i class="bi bi-graph-up"></i> My Performance Report
-                        </a>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h6 class="text-muted mb-3"><i class="bi bi-info-circle"></i> Task Statistics</h6>
-                    <div class="row text-center">
-                        <div class="col-6 mb-3">
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
                             <div class="p-3 bg-light rounded">
                                 <h4 class="mb-0">
                                     @if($stats['total_tasks'] > 0)
@@ -224,12 +200,21 @@
                                 <small class="text-muted">Completion Rate</small>
                             </div>
                         </div>
-                        <div class="col-6 mb-3">
+                        <div class="col-6">
                             <div class="p-3 bg-light rounded">
                                 <h4 class="mb-0">{{ $stats['total_tasks'] - $stats['completed_tasks'] }}</h4>
                                 <small class="text-muted">Active Tasks</small>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('tasks.index') }}" class="btn btn-primary">
+                            <i class="bi bi-list-task"></i> View All Tasks
+                        </a>
+                        <a href="{{ route('calendar') }}" class="btn btn-primary">
+                            <i class="bi bi-calendar3"></i> View Calendar
+                        </a>
                     </div>
                 </div>
             </div>

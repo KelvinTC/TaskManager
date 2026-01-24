@@ -64,10 +64,8 @@ class UserInvited extends Notification implements ShouldQueue
 
         return "🎉 *Welcome to {$appName}!*\n\n" .
                "You have been invited by *{$this->invitedByName}*\n\n" .
-               "📋 *Role:* " . ucfirst(str_replace('_', ' ', $this->role)) . "\n" .
-               "📱 *Phone:* {$this->invitedUserPhone}\n\n" .
                "👉 Please complete your registration:\n" .
-               "{$registerUrl}\n\n" .
-               "⚠️ Use your phone number *{$this->invitedUserPhone}* when registering.";
+               "{$registerUrl}\n\n";
+
     }
 }
