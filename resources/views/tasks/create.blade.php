@@ -5,10 +5,10 @@
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow-lg">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Task</h4>
-                        <a href="{{ route('tasks.index') }}" class="btn btn-light btn-sm">
+                        <a href="{{ route('tasks.index') }}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-arrow-left"></i> Back to Tasks
                         </a>
                     </div>
@@ -105,7 +105,7 @@
                         </div>
 
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> <strong>Note:</strong> The assigned employee will be notified about this task via their preferred channel.
+                            <i class="bi bi-info-circle"></i> <strong>Note:</strong> The assigned employee will be notified about this task via  whatsapp.
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">
