@@ -6,11 +6,10 @@ use App\Models\Task;
 use App\Channels\SmsChannel;
 use App\Channels\WhatsappChannel;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TaskOverdue extends Notification implements ShouldQueue
+class TaskOverdue extends Notification
 {
     use Queueable;
 
