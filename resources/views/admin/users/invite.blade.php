@@ -22,11 +22,10 @@
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
-                            <small class="form-text text-muted">The user will be able to register using this email address.</small>
                         </div>
 
                         <div class="mb-3">
-                            <label for="phone_number" class="form-label">Phone Number (WhatsApp) <span class="text-muted">(Optional)</span></label>
+                            <label for="phone_number" class="form-label">Phone Number (WhatsApp)</label>
                             <input id="phone_number" type="tel" class="form-control @error('phone_number') is-invalid @enderror" name="phone_number" value="{{ old('phone_number') }}" placeholder="+1234567890">
 
                             @error('phone_number')
