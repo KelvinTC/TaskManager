@@ -61,12 +61,7 @@
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
-                <i class="bi bi-graph-up"></i> Overview
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button">
+            <button class="nav-link active" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button">
                 <i class="bi bi-people"></i> Team Performance
             </button>
         </li>
@@ -85,57 +80,8 @@
     <!-- Tab Content -->
     <div class="tab-content" id="dashboardTabContent">
 
-        <!-- Overview Tab -->
-        <div class="tab-pane fade show active" id="overview" role="tabpanel">
-            @if($stats['total_tasks'] > 0)
-                <div class="row">
-                    <!-- Status Chart -->
-                    <div class="col-lg-4 mb-4">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <h5 class="card-title mb-4"><i class="bi bi-pie-chart"></i> Task Status</h5>
-                                <canvas id="statusChart" height="280"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Priority Chart -->
-                    <div class="col-lg-4 mb-4">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body">
-                                <h5 class="card-title mb-4"><i class="bi bi-bar-chart"></i> Priority Levels</h5>
-                                <canvas id="priorityChart" height="280"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Completion Rate -->
-                    <div class="col-lg-4 mb-4">
-                        <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body text-center">
-                                <h5 class="card-title mb-4"><i class="bi bi-speedometer2"></i> Completion Rate</h5>
-                                <canvas id="completionGauge" height="200"></canvas>
-                                <h2 class="mt-3">{{ round(($stats['completed_tasks'] / $stats['total_tasks']) * 100) }}%</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @else
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <i class="bi bi-inbox text-muted mb-3" style="font-size: 4rem;"></i>
-                        <h4 class="text-muted">No Tasks Yet</h4>
-                        <p class="text-muted mb-4">Create your first task to see analytics and charts</p>
-                        <a href="{{ route('tasks.create') }}" class="btn btn-primary btn-lg">
-                            <i class="bi bi-plus-circle"></i> Create First Task
-                        </a>
-                    </div>
-                </div>
-            @endif
-        </div>
-
         <!-- Team Performance Tab -->
-        <div class="tab-pane fade" id="team" role="tabpanel">
+        <div class="tab-pane fade show active" id="team" role="tabpanel">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-4"><i class="bi bi-people"></i> Employee Performance Overview</h5>
@@ -326,109 +272,10 @@
     </div>
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
 <script>
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Chart Data
-    const statusData = {
-        labels: ['Pending', 'In Progress', 'Completed'],
-        datasets: [{
-            data: [{{ $stats['pending_tasks'] }}, {{ $stats['in_progress_tasks'] }}, {{ $stats['completed_tasks'] }}],
-            backgroundColor: ['#fbbf24', '#3b82f6', '#10b981'],
-            borderWidth: 2,
-            borderColor: '#fff'
-        }]
-    };
-
-    const priorityData = {
-        labels: ['Low', 'Medium', 'High'],
-        datasets: [{
-            label: 'Tasks',
-            data: [
-                {{ $tasksByPriority->where('priority', 'low')->first()->count ?? 0 }},
-                {{ $tasksByPriority->where('priority', 'medium')->first()->count ?? 0 }},
-                {{ $tasksByPriority->where('priority', 'high')->first()->count ?? 0 }}
-            ],
-            backgroundColor: ['#9ca3af', '#fbbf24', '#ef4444'],
-            borderRadius: 5
-        }]
-    };
-
-    const completionRate = {{ $stats['total_tasks'] > 0 ? round(($stats['completed_tasks'] / $stats['total_tasks']) * 100) : 0 }};
-    const hasTasks = {{ $stats['total_tasks'] > 0 ? 'true' : 'false' }};
-
-    // Common chart options to prevent infinite loops
-    const commonOptions = {
-        animation: false, // Disable animations to prevent loops
-        responsive: true,
-        maintainAspectRatio: false
-    };
-
-    // Only initialize charts if there are tasks
-    if (hasTasks) {
-        // Status Doughnut Chart
-        const statusChartEl = document.getElementById('statusChart');
-        if (statusChartEl) {
-            new Chart(statusChartEl, {
-                type: 'doughnut',
-                data: statusData,
-                options: {
-                    ...commonOptions,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 } } }
-                    }
-                }
-            });
-        }
-
-        // Priority Bar Chart
-        const priorityChartEl = document.getElementById('priorityChart');
-        if (priorityChartEl) {
-            new Chart(priorityChartEl, {
-                type: 'bar',
-                data: priorityData,
-                options: {
-                    ...commonOptions,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                    }
-                }
-            });
-        }
-
-        // Completion Gauge
-        const gaugeChartEl = document.getElementById('completionGauge');
-        if (gaugeChartEl) {
-            new Chart(gaugeChartEl, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [completionRate, 100 - completionRate],
-                        backgroundColor: [
-                            completionRate >= 75 ? '#10b981' : (completionRate >= 50 ? '#fbbf24' : '#ef4444'),
-                            '#e5e7eb'
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    circumference: 180,
-                    rotation: -90,
-                    cutout: '75%',
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
-                }
-            });
-        }
-    }
-});
-
 // Download CSV Report
 function downloadCSV() {
+    const completionRate = {{ $stats['total_tasks'] > 0 ? round(($stats['completed_tasks'] / $stats['total_tasks']) * 100) : 0 }};
     const employeeData = [
         @foreach($employees as $employee)
             @php
