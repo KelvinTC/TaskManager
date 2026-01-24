@@ -8,7 +8,7 @@
                 <div class="card-header bg-dark text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0"><i class="bi bi-file-text"></i> Task Details</h4>
-                        <a href="{{ route('tasks.index') }}" class="btn btn-light btn-sm">
+                        <a href="{{ route('tasks.index') }}" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-arrow-left"></i> Back
                         </a>
                     </div>
@@ -31,7 +31,7 @@
 
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="card bg-light">
+                            <div class="card border">
                                 <div class="card-body">
                                     <h6 class="text-muted">Created By</h6>
                                     <p class="mb-0"><strong>{{ $task->creator->name }}</strong></p>
@@ -40,7 +40,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card bg-light">
+                            <div class="card border">
                                 <div class="card-body">
                                     <h6 class="text-muted">Assigned To</h6>
                                     <p class="mb-0"><strong>{{ $task->assignedTo->name }}</strong></p>
@@ -65,7 +65,7 @@
 
                     <div class="mb-4">
                         <h6 class="text-muted">Description</h6>
-                        <div class="card bg-light">
+                        <div class="card border">
                             <div class="card-body">
                                 {!! nl2br(e($task->description)) !!}
                             </div>
@@ -83,7 +83,7 @@
                                         <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
                                         <option value="completed" {{ $task->status === 'completed' ? 'selected' : '' }}>Completed</option>
                                     </select>
-                                    <button type="submit" class="btn btn-light">Update</button>
+                                    <button type="submit" class="btn btn-success">Update</button>
                                 </form>
                             </div>
                         </div>

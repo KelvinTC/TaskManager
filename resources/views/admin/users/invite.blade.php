@@ -51,10 +51,6 @@
                             @enderror
                         </div>
 
-                        <div class="alert alert-info">
-                            <strong>Note:</strong> The invited user will receive an invitation to register. They must use the invited email address during registration.
-                        </div>
-
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Cancel</a>
                             <button type="submit" class="btn btn-primary">Send Invitation</button>
