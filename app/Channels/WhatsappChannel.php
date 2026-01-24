@@ -141,6 +141,13 @@ class WhatsappChannel
         $instanceId = config('services.whatsapp.ultramsg.instance_id');
         $token = config('services.whatsapp.ultramsg.token');
 
+        Log::info('Attempting to send Ultramsg WhatsApp', [
+            'to' => $to,
+            'instance_id' => $instanceId,
+            'token_set' => !empty($token),
+            'message_length' => strlen($message),
+        ]);
+
         if (empty($instanceId) || empty($token)) {
             Log::warning('Ultramsg credentials not configured');
             return;
@@ -152,12 +159,17 @@ class WhatsappChannel
             'body' => $message,
         ]);
 
+        Log::info('Ultramsg API response', [
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
+
         if ($response->failed()) {
             Log::error('Ultramsg API error: ' . $response->body());
             throw new \Exception('Ultramsg send failed: ' . $response->body());
         }
 
-        Log::info('Ultramsg WhatsApp message sent', [
+        Log::info('Ultramsg WhatsApp message sent successfully', [
             'to' => $to,
             'response' => $response->json(),
         ]);
