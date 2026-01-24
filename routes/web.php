@@ -122,6 +122,46 @@ if (!empty(env('DIAG_TOKEN'))) {
         ]);
     });
 
+    // Check task and user settings
+    Route::get('/diag/check-task', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $taskId = $request->query('task_id');
+
+        if (!$taskId) {
+            // Get latest task
+            $task = \App\Models\Task::with(['creator', 'assignedTo'])->latest()->first();
+        } else {
+            $task = \App\Models\Task::with(['creator', 'assignedTo'])->find($taskId);
+        }
+
+        if (!$task) {
+            return response()->json(['error' => 'No task found']);
+        }
+
+        return response()->json([
+            'task' => [
+                'id' => $task->id,
+                'title' => $task->title,
+                'status' => $task->status,
+            ],
+            'creator' => [
+                'name' => $task->creator->name,
+                'email' => $task->creator->email,
+                'phone' => $task->creator->phone ?? 'NOT SET',
+                'preferred_channel' => $task->creator->preferred_channel ?? 'NOT SET',
+            ],
+            'assigned_to' => $task->assignedTo ? [
+                'name' => $task->assignedTo->name,
+                'email' => $task->assignedTo->email,
+                'phone' => $task->assignedTo->phone ?? 'NOT SET',
+                'preferred_channel' => $task->assignedTo->preferred_channel ?? 'NOT SET',
+            ] : null,
+        ]);
+    });
+
     // Test send WhatsApp notification endpoint
     Route::get('/diag/test-send', function (Request $request) {
         if ($request->query('token') !== env('DIAG_TOKEN')) {
