@@ -28,9 +28,9 @@ class UserInvited extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        $channels = ['mail'];
+        $channels = [];
 
-        // Add WhatsApp if phone number is provided
+        // Only send WhatsApp if phone number is provided
         if (!empty($this->invitedUserPhone)) {
             $channels[] = WhatsappChannel::class;
         }
