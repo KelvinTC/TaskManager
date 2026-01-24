@@ -60,11 +60,11 @@
 
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
-{{--        <li class="nav-item" role="presentation">--}}
-{{--            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">--}}
-{{--                <i class="bi bi-graph-up"></i> Overview--}}
-{{--            </button>--}}
-{{--        </li>--}}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+                <i class="bi bi-graph-up"></i> Overview
+            </button>
+        </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button">
                 <i class="bi bi-people"></i> Team Performance
@@ -330,95 +330,102 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
-// Chart Data
-const statusData = {
-    labels: ['Pending', 'In Progress', 'Completed'],
-    datasets: [{
-        data: [{{ $stats['pending_tasks'] }}, {{ $stats['in_progress_tasks'] }}, {{ $stats['completed_tasks'] }}],
-        backgroundColor: ['#fbbf24', '#3b82f6', '#10b981'],
-        borderWidth: 2,
-        borderColor: '#fff'
-    }]
-};
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Chart Data
+    const statusData = {
+        labels: ['Pending', 'In Progress', 'Completed'],
+        datasets: [{
+            data: [{{ $stats['pending_tasks'] }}, {{ $stats['in_progress_tasks'] }}, {{ $stats['completed_tasks'] }}],
+            backgroundColor: ['#fbbf24', '#3b82f6', '#10b981'],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    };
 
-const priorityData = {
-    labels: ['Low', 'Medium', 'High'],
-    datasets: [{
-        label: 'Tasks',
-        data: [
-            {{ $tasksByPriority->where('priority', 'low')->first()->count ?? 0 }},
-            {{ $tasksByPriority->where('priority', 'medium')->first()->count ?? 0 }},
-            {{ $tasksByPriority->where('priority', 'high')->first()->count ?? 0 }}
-        ],
-        backgroundColor: ['#9ca3af', '#fbbf24', '#ef4444'],
-        borderRadius: 5
-    }]
-};
+    const priorityData = {
+        labels: ['Low', 'Medium', 'High'],
+        datasets: [{
+            label: 'Tasks',
+            data: [
+                {{ $tasksByPriority->where('priority', 'low')->first()->count ?? 0 }},
+                {{ $tasksByPriority->where('priority', 'medium')->first()->count ?? 0 }},
+                {{ $tasksByPriority->where('priority', 'high')->first()->count ?? 0 }}
+            ],
+            backgroundColor: ['#9ca3af', '#fbbf24', '#ef4444'],
+            borderRadius: 5
+        }]
+    };
 
-const completionRate = {{ $stats['total_tasks'] > 0 ? round(($stats['completed_tasks'] / $stats['total_tasks']) * 100) : 0 }};
-const hasTasks = {{ $stats['total_tasks'] > 0 ? 'true' : 'false' }};
+    const completionRate = {{ $stats['total_tasks'] > 0 ? round(($stats['completed_tasks'] / $stats['total_tasks']) * 100) : 0 }};
+    const hasTasks = {{ $stats['total_tasks'] > 0 ? 'true' : 'false' }};
 
-// Only initialize charts if there are tasks
-if (hasTasks) {
-    // Status Doughnut Chart
-    const statusChartEl = document.getElementById('statusChart');
-    if (statusChartEl) {
-        new Chart(statusChartEl, {
-            type: 'doughnut',
-            data: statusData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 } } }
+    // Common chart options to prevent infinite loops
+    const commonOptions = {
+        animation: false, // Disable animations to prevent loops
+        responsive: true,
+        maintainAspectRatio: false
+    };
+
+    // Only initialize charts if there are tasks
+    if (hasTasks) {
+        // Status Doughnut Chart
+        const statusChartEl = document.getElementById('statusChart');
+        if (statusChartEl) {
+            new Chart(statusChartEl, {
+                type: 'doughnut',
+                data: statusData,
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 12 } } }
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    // Priority Bar Chart
-    const priorityChartEl = document.getElementById('priorityChart');
-    if (priorityChartEl) {
-        new Chart(priorityChartEl, {
-            type: 'bar',
-            data: priorityData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        // Priority Bar Chart
+        const priorityChartEl = document.getElementById('priorityChart');
+        if (priorityChartEl) {
+            new Chart(priorityChartEl, {
+                type: 'bar',
+                data: priorityData,
+                options: {
+                    ...commonOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    // Completion Gauge
-    const gaugeChartEl = document.getElementById('completionGauge');
-    if (gaugeChartEl) {
-        new Chart(gaugeChartEl, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [completionRate, 100 - completionRate],
-                    backgroundColor: [
-                        completionRate >= 75 ? '#10b981' : (completionRate >= 50 ? '#fbbf24' : '#ef4444'),
-                        '#e5e7eb'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                circumference: 180,
-                rotation: -90,
-                cutout: '75%',
-                plugins: { legend: { display: false }, tooltip: { enabled: false } }
-            }
-        });
+        // Completion Gauge
+        const gaugeChartEl = document.getElementById('completionGauge');
+        if (gaugeChartEl) {
+            new Chart(gaugeChartEl, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [completionRate, 100 - completionRate],
+                        backgroundColor: [
+                            completionRate >= 75 ? '#10b981' : (completionRate >= 50 ? '#fbbf24' : '#ef4444'),
+                            '#e5e7eb'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '75%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+        }
     }
-}
+});
 
 // Download CSV Report
 function downloadCSV() {
