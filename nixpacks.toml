@@ -1,13 +1,6 @@
 [phases.setup]
 nixPkgs = ["tzdata"]
 
-[phases.build]
-cmds = [
-    "composer install --no-dev --optimize-autoloader",
-    "npm ci",
-    "npm run build"
-]
-
 [phases.install]
 cmds = [
     "mkdir -p /app/storage/database",
