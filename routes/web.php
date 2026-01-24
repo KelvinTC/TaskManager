@@ -85,14 +85,50 @@ if (!empty(env('DIAG_TOKEN'))) {
         return response()->json($data);
     });
 
+    // Migration runner endpoint
+    Route::get('/diag/migrate', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $data = [
+            'migrations_run' => false,
+            'seeder_run' => false,
+            'errors' => [],
+        ];
+
+        try {
+            // Run migrations
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $data['migrations_run'] = true;
+            $data['migration_output'] = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Throwable $e) {
+            $data['errors'][] = 'Migration failed: ' . $e->getMessage();
+        }
+
+        try {
+            // Run SuperAdminSeeder
+            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                '--class' => 'SuperAdminSeeder',
+                '--force' => true,
+            ]);
+            $data['seeder_run'] = true;
+            $data['seeder_output'] = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Throwable $e) {
+            $data['errors'][] = 'Seeder failed: ' . $e->getMessage();
+        }
+
+        return response()->json($data);
+    });
+
     // User diagnostic and fix endpoint
     Route::get('/diag/users', function (Request $request) {
         if ($request->query('token') !== env('DIAG_TOKEN')) {
             abort(403);
         }
 
-        $expectedEmail = env('SUPERADMIN_EMAIL', 'admin@tm.com');
-        $expectedPassword = env('SUPERADMIN_PASSWORD', 'password@1');
+        $expectedEmail = env('SUPERADMIN_EMAIL', 'superadmin@taskmanager.com');
+        $expectedPassword = env('SUPERADMIN_PASSWORD', 'password123');
         $fix = $request->query('fix') === 'true';
         $create = $request->query('create') === 'true';
 
