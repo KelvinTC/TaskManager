@@ -85,6 +85,43 @@ if (!empty(env('DIAG_TOKEN'))) {
         return response()->json($data);
     });
 
+    // Update user WhatsApp settings
+    Route::get('/diag/update-user-whatsapp', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $email = $request->query('email');
+        $phone = $request->query('phone'); // e.g., +263783017279
+
+        if (!$email || !$phone) {
+            return response()->json([
+                'error' => 'Please provide ?email=user@example.com&phone=+263XXXXXXXXX parameters',
+            ]);
+        }
+
+        $user = \App\Models\User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not found with email: ' . $email]);
+        }
+
+        $user->phone = $phone;
+        $user->preferred_channel = 'whatsapp';
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User updated successfully',
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'preferred_channel' => $user->preferred_channel,
+            ],
+        ]);
+    });
+
     // Test send WhatsApp notification endpoint
     Route::get('/diag/test-send', function (Request $request) {
         if ($request->query('token') !== env('DIAG_TOKEN')) {
