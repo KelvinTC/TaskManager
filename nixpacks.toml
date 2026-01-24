@@ -1,5 +1,19 @@
 [phases.setup]
-nixPkgs = ["tzdata"]
+nixPkgs = ["php82", "php82Packages.composer", "nodejs", "tzdata"]
+
+[phases.build]
+cmds = [
+    "composer install --no-dev --optimize-autoloader --no-interaction",
+    "npm ci --include=dev",
+    "npm run build"
+]
+
+[phases.install]
+cmds = [
+    "mkdir -p storage/database storage/framework/{cache,sessions,views} storage/logs bootstrap/cache",
+    "touch storage/database/database.sqlite",
+    "chmod -R 775 storage bootstrap/cache"
+]
 
 [start]
 cmd = "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
