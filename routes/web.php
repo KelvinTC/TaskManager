@@ -85,6 +85,59 @@ if (!empty(env('DIAG_TOKEN'))) {
         return response()->json($data);
     });
 
+    // WhatsApp configuration check endpoint
+    Route::get('/diag/whatsapp', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $provider = config('services.whatsapp.provider');
+
+        $config = [
+            'provider' => $provider,
+            'env_vars' => [
+                'WHATSAPP_PROVIDER' => env('WHATSAPP_PROVIDER'),
+                'WHATSAPP_USE_TEMPLATES' => env('WHATSAPP_USE_TEMPLATES'),
+            ],
+        ];
+
+        // Check provider-specific config
+        switch ($provider) {
+            case 'ultramsg':
+                $config['ultramsg'] = [
+                    'instance_id' => env('ULTRAMSG_INSTANCE_ID') ? '✓ Set' : '✗ Not set',
+                    'token' => env('ULTRAMSG_TOKEN') ? '✓ Set' : '✗ Not set',
+                ];
+                break;
+            case 'meta':
+                $config['meta'] = [
+                    'token' => env('META_WHATSAPP_TOKEN') ? '✓ Set' : '✗ Not set',
+                    'phone_id' => env('META_WHATSAPP_PHONE_ID') ? '✓ Set' : '✗ Not set',
+                ];
+                break;
+            case 'twilio':
+                $config['twilio'] = [
+                    'sid' => env('TWILIO_SID') ? '✓ Set' : '✗ Not set',
+                    'token' => env('TWILIO_TOKEN') ? '✓ Set' : '✗ Not set',
+                    'from' => env('TWILIO_WHATSAPP_FROM') ? '✓ Set' : '✗ Not set',
+                ];
+                break;
+        }
+
+        // Check queue status
+        try {
+            $config['queue'] = [
+                'connection' => config('queue.default'),
+                'pending_jobs' => \DB::table('jobs')->count(),
+                'failed_jobs' => \DB::table('failed_jobs')->count(),
+            ];
+        } catch (\Throwable $e) {
+            $config['queue'] = ['error' => $e->getMessage()];
+        }
+
+        return response()->json($config);
+    });
+
     // Migration runner endpoint
     Route::get('/diag/migrate', function (Request $request) {
         if ($request->query('token') !== env('DIAG_TOKEN')) {
