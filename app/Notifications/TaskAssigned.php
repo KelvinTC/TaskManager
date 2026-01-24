@@ -6,11 +6,10 @@ use App\Models\Task;
 use App\Channels\SmsChannel;
 use App\Channels\WhatsappChannel;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TaskAssigned extends Notification implements ShouldQueue
+class TaskAssigned extends Notification
 {
     use Queueable;
 
@@ -25,6 +24,14 @@ class TaskAssigned extends Notification implements ShouldQueue
     {
         $channels = ['database'];
 
+        \Log::info('TaskAssigned notification via() called', [
+            'notifiable_id' => $notifiable->id,
+            'notifiable_name' => $notifiable->name,
+            'preferred_channel' => $notifiable->preferred_channel,
+            'task_id' => $this->task->id,
+            'task_title' => $this->task->title
+        ]);
+
         switch ($notifiable->preferred_channel) {
             case 'sms':
                 $channels[] = SmsChannel::class;
@@ -36,6 +43,8 @@ class TaskAssigned extends Notification implements ShouldQueue
                 $channels[] = 'mail';
                 break;
         }
+
+        \Log::info('TaskAssigned notification channels', ['channels' => $channels]);
 
         return $channels;
     }
@@ -96,30 +105,5 @@ class TaskAssigned extends Notification implements ShouldQueue
                     "👉 View full details:\n{$taskUrl}";
 
         return $message;
-    }
-
-    public function useWhatsappTemplate()
-    {
-        return config('services.whatsapp.use_templates', false) &&
-               config('services.whatsapp.provider') === 'meta';
-    }
-
-    public function toWhatsappTemplate($notifiable)
-    {
-        return [
-            'name' => config('services.whatsapp.templates.task_assigned', 'hello_world'),
-            'language' => 'en_US',
-            // If your template has variables, add them here:
-            // 'components' => [
-            //     [
-            //         'type' => 'body',
-            //         'parameters' => [
-            //             ['type' => 'text', 'text' => $this->task->title],
-            //             ['type' => 'text', 'text' => $this->task->scheduled_at->format('M d, Y H:i')],
-            //             ['type' => 'text', 'text' => ucfirst($this->task->priority)],
-            //         ],
-            //     ],
-            // ],
-        ];
     }
 }

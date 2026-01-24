@@ -111,6 +111,32 @@ class UserManagementController extends Controller
         return redirect()->back()->with('error', 'Cannot demote this user.');
     }
 
+    public function deleteUser(User $user)
+    {
+        // Only super admin can delete users
+        if (!Auth::user()->isSuperAdmin()) {
+            abort(403, 'Only Super Admin can delete users.');
+        }
+
+        // Prevent deleting yourself
+        if ($user->id === Auth::id()) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+
+        // Prevent deleting other super admins
+        if ($user->isSuperAdmin()) {
+            return redirect()->back()->with('error', 'Cannot delete Super Admin accounts.');
+        }
+
+        $userName = $user->name;
+
+        // Delete user
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "User '{$userName}' has been deleted successfully!");
+    }
+
     public function edit(User $user)
     {
         // Prevent editing super admin by non-super admins

@@ -237,6 +237,7 @@ Route::middleware(['web','auth'])->group(function () {
         Route::delete('/invitations/{invitation}', [UserManagementController::class, 'destroy'])->name('invitations.destroy');
         Route::post('/users/{user}/promote', [UserManagementController::class, 'promoteToAdmin'])->name('users.promote');
         Route::post('/users/{user}/demote', [UserManagementController::class, 'demoteToEmployee'])->name('users.demote');
+        Route::delete('/users/{user}', [UserManagementController::class, 'deleteUser'])->name('users.delete');
     });
 });
 

@@ -10,7 +10,15 @@ class WhatsappChannel
 {
     public function send($notifiable, Notification $notification)
     {
-        $to = $notifiable->routeNotificationFor('whatsapp', $notification);
+        // Handle both regular notifiables (User models) and anonymous notifiables (Notification::route())
+        if (method_exists($notifiable, 'routeNotificationFor')) {
+            $to = $notifiable->routeNotificationFor('whatsapp', $notification);
+        } elseif (isset($notifiable->routes['whatsapp'])) {
+            // Anonymous notifiable created with Notification::route()
+            $to = $notifiable->routes['whatsapp'];
+        } else {
+            $to = null;
+        }
 
         if (!$to) {
             return;
@@ -18,52 +26,40 @@ class WhatsappChannel
 
         $provider = config('services.whatsapp.provider', 'twilio');
 
-        // Check if notification supports templates
-        $useTemplate = method_exists($notification, 'toWhatsappTemplate') &&
-                       method_exists($notification, 'useWhatsappTemplate') &&
-                       $notification->useWhatsappTemplate();
-
         try {
-            if ($useTemplate && $provider === 'meta') {
-                // Use template message for Meta
-                $templateData = $notification->toWhatsappTemplate($notifiable);
-                $this->sendTemplateViaMeta($to, $templateData);
-            } else {
-                // Fall back to text message
-                $message = $notification->toWhatsapp($notifiable);
+            $message = $notification->toWhatsapp($notifiable);
 
-                if (!$message) {
-                    return;
-                }
+            if (!$message) {
+                return;
+            }
 
-                switch ($provider) {
-                    case 'meta':
-                        $this->sendViaMeta($to, $message);
-                        break;
+            switch ($provider) {
+                case 'meta':
+                    $this->sendViaMeta($to, $message);
+                    break;
 
-                    case 'twilio':
-                        $this->sendViaTwilio($to, $message);
-                        break;
+                case 'twilio':
+                    $this->sendViaTwilio($to, $message);
+                    break;
 
-                    case 'vonage':
-                        $this->sendViaVonage($to, $message);
-                        break;
+                case 'vonage':
+                    $this->sendViaVonage($to, $message);
+                    break;
 
-                    case 'ultramsg':
-                        $this->sendViaUltramsg($to, $message);
-                        break;
+                case 'ultramsg':
+                    $this->sendViaUltramsg($to, $message);
+                    break;
 
-                    case 'wati':
-                        $this->sendViaWati($to, $message);
-                        break;
+                case 'wati':
+                    $this->sendViaWati($to, $message);
+                    break;
 
-                    case 'whapi':
-                        $this->sendViaWhapi($to, $message);
-                        break;
+                case 'whapi':
+                    $this->sendViaWhapi($to, $message);
+                    break;
 
-                    default:
-                        Log::warning("Unknown WhatsApp provider: {$provider}");
-                }
+                default:
+                    Log::warning("Unknown WhatsApp provider: {$provider}");
             }
         } catch (\Exception $e) {
             Log::error('WhatsApp send failed: ' . $e->getMessage());
@@ -101,52 +97,6 @@ class WhatsappChannel
 
         Log::info('Meta WhatsApp message sent', [
             'to' => $to,
-            'message_id' => $response->json('messages.0.id'),
-        ]);
-    }
-
-    protected function sendTemplateViaMeta($to, $templateData)
-    {
-        $token = config('services.whatsapp.meta.token');
-        $phoneId = config('services.whatsapp.meta.phone_id');
-        $version = config('services.whatsapp.meta.version', 'v21.0');
-
-        if (empty($token) || empty($phoneId)) {
-            Log::warning('Meta WhatsApp credentials not configured');
-            return;
-        }
-
-        // Remove + from phone number if present
-        $to = ltrim($to, '+');
-
-        $payload = [
-            'messaging_product' => 'whatsapp',
-            'to' => $to,
-            'type' => 'template',
-            'template' => [
-                'name' => $templateData['name'],
-                'language' => [
-                    'code' => $templateData['language'] ?? 'en_US',
-                ],
-            ],
-        ];
-
-        // Add template components if provided (variables, buttons, etc.)
-        if (isset($templateData['components']) && !empty($templateData['components'])) {
-            $payload['template']['components'] = $templateData['components'];
-        }
-
-        $response = Http::withToken($token)
-            ->post("https://graph.facebook.com/{$version}/{$phoneId}/messages", $payload);
-
-        if ($response->failed()) {
-            Log::error('Meta WhatsApp Template API error: ' . $response->body());
-            throw new \Exception('Meta WhatsApp template send failed: ' . $response->body());
-        }
-
-        Log::info('Meta WhatsApp template sent', [
-            'to' => $to,
-            'template' => $templateData['name'],
             'message_id' => $response->json('messages.0.id'),
         ]);
     }
@@ -191,10 +141,25 @@ class WhatsappChannel
         $instanceId = config('services.whatsapp.ultramsg.instance_id');
         $token = config('services.whatsapp.ultramsg.token');
 
-        Http::post("https://api.ultramsg.com/{$instanceId}/messages/chat", [
+        if (empty($instanceId) || empty($token)) {
+            Log::warning('Ultramsg credentials not configured');
+            return;
+        }
+
+        $response = Http::post("https://api.ultramsg.com/{$instanceId}/messages/chat", [
             'token' => $token,
             'to' => $to,
             'body' => $message,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('Ultramsg API error: ' . $response->body());
+            throw new \Exception('Ultramsg send failed: ' . $response->body());
+        }
+
+        Log::info('Ultramsg WhatsApp message sent', [
+            'to' => $to,
+            'response' => $response->json(),
         ]);
     }
 

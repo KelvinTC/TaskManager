@@ -91,18 +91,4 @@ class TaskStatusUpdated extends Notification implements ShouldQueue
                "📊 *New Status:* {$status}\n\n" .
                "👉 View task:\n{$taskUrl}";
     }
-
-    public function useWhatsappTemplate()
-    {
-        return config('services.whatsapp.use_templates', false) &&
-               config('services.whatsapp.provider') === 'meta';
-    }
-
-    public function toWhatsappTemplate($notifiable)
-    {
-        return [
-            'name' => config('services.whatsapp.templates.task_status_updated', 'hello_world'),
-            'language' => 'en_US',
-        ];
-    }
 }

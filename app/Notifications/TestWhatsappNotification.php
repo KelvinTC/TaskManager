@@ -15,9 +15,9 @@ class TestWhatsappNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct($message)
+    public function __construct($message = null)
     {
-        $this->message = $message;
+        $this->message = $message ?? "🎉 *Test WhatsApp Notification*\n\nThis is a test message from your Task Manager application.\n\nIf you received this, your WhatsApp notifications are working correctly! ✅";
     }
 
     /**

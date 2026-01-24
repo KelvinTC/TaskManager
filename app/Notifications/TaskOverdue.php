@@ -87,18 +87,4 @@ class TaskOverdue extends Notification implements ShouldQueue
                "⚠️ *Action Required:* Please complete this task as soon as possible!\n\n" .
                "👉 View task:\n{$taskUrl}";
     }
-
-    public function useWhatsappTemplate()
-    {
-        return config('services.whatsapp.use_templates', false) &&
-               config('services.whatsapp.provider') === 'meta';
-    }
-
-    public function toWhatsappTemplate($notifiable)
-    {
-        return [
-            'name' => config('services.whatsapp.templates.task_overdue', 'hello_world'),
-            'language' => 'en_US',
-        ];
-    }
 }

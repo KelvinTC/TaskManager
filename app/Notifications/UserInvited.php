@@ -66,29 +66,4 @@ class UserInvited extends Notification implements ShouldQueue
                "⚠️ *Important:* Use the email address *{$this->invitedUser->email}* when registering.\n\n" .
                "Welcome to the team! 🚀";
     }
-
-    public function useWhatsappTemplate()
-    {
-        return config('services.whatsapp.use_templates', false) &&
-               config('services.whatsapp.provider') === 'meta';
-    }
-
-    public function toWhatsappTemplate($notifiable)
-    {
-        return [
-            'name' => config('services.whatsapp.templates.user_invitation', 'hello_world'),
-            'language' => 'en_US',
-            // If your template has variables, add them here:
-            // 'components' => [
-            //     [
-            //         'type' => 'body',
-            //         'parameters' => [
-            //             ['type' => 'text', 'text' => $this->invitedBy->name],
-            //             ['type' => 'text', 'text' => $this->role],
-            //             ['type' => 'text', 'text' => $this->invitedUser->email],
-            //         ],
-            //     ],
-            // ],
-        ];
-    }
 }
