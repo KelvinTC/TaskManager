@@ -1,8 +1,0 @@
-[phases.setup]
-nixPkgs = ['nginx', 'php82', 'php82Extensions.mbstring', 'php82Extensions.pdo', 'php82Extensions.pdo_sqlite']
-
-[phases.install]
-cmds = ['composer install --no-dev --optimize-autoloader']
-
-[start]
-cmd = 'bash -c "php artisan queue:work --sleep=3 --tries=3 --daemon & php-fpm -y /assets/php-fpm.conf & nginx -c /assets/nginx.conf"'
