@@ -289,9 +289,9 @@
                             <button onclick="downloadCSV()" class="btn btn-outline-success w-100 mb-2">
                                 <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV Report
                             </button>
-                            <button onclick="downloadJSON()" class="btn btn-outline-primary w-100 mb-2">
-                                <i class="bi bi-file-earmark-text"></i> Download JSON Report
-                            </button>
+{{--                            <button onclick="downloadJSON()" class="btn btn-outline-primary w-100 mb-2">--}}
+{{--                                <i class="bi bi-file-earmark-text"></i> Download JSON Report--}}
+{{--                            </button>--}}
                             <button onclick="window.print()" class="btn btn-outline-secondary w-100">
                                 <i class="bi bi-printer"></i> Print Dashboard
                             </button>
