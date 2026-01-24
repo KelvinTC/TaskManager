@@ -105,12 +105,19 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        // Optimize: Get all tasks once and calculate stats in PHP
+        $allTasks = Task::where('assigned_to', $user->id)
+            ->select('id', 'status', 'priority', 'scheduled_at', 'created_at')
+            ->get();
+
         $stats = [
-            'total_tasks' => Task::where('assigned_to', $user->id)->count(),
-            'pending_tasks' => Task::where('assigned_to', $user->id)->pending()->count(),
-            'in_progress_tasks' => Task::where('assigned_to', $user->id)->inProgress()->count(),
-            'completed_tasks' => Task::where('assigned_to', $user->id)->completed()->count(),
-            'overdue_tasks' => Task::where('assigned_to', $user->id)->overdue()->count(),
+            'total_tasks' => $allTasks->count(),
+            'pending_tasks' => $allTasks->where('status', 'pending')->count(),
+            'in_progress_tasks' => $allTasks->where('status', 'in_progress')->count(),
+            'completed_tasks' => $allTasks->where('status', 'completed')->count(),
+            'overdue_tasks' => $allTasks->filter(function($task) {
+                return $task->scheduled_at && $task->scheduled_at->isPast() && $task->status !== 'completed';
+            })->count(),
         ];
 
         $recent_tasks = Task::with(['assignedTo', 'creator'])
@@ -125,10 +132,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $tasksByPriority = Task::where('assigned_to', $user->id)
-            ->select('priority', DB::raw('count(*) as count'))
-            ->groupBy('priority')
-            ->get();
+        $tasksByPriority = $allTasks->groupBy('priority')->map(function($tasks) {
+            return (object)['priority' => $tasks->first()->priority, 'count' => $tasks->count()];
+        })->values();
 
         return view('dashboard.employee', compact(
             'stats',
