@@ -85,6 +85,52 @@ if (!empty(env('DIAG_TOKEN'))) {
         return response()->json($data);
     });
 
+    // Test send WhatsApp notification endpoint
+    Route::get('/diag/test-send', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        try {
+            // Find a user with WhatsApp enabled
+            $user = \App\Models\User::where('preferred_channel', 'whatsapp')
+                ->whereNotNull('phone')
+                ->first();
+
+            if (!$user) {
+                return response()->json([
+                    'error' => 'No user found with WhatsApp enabled and phone number set',
+                ]);
+            }
+
+            // Find or create a test task
+            $task = \App\Models\Task::first();
+            if (!$task) {
+                return response()->json(['error' => 'No tasks found in database']);
+            }
+
+            // Send notification
+            $user->notify(new \App\Notifications\TaskAssigned($task));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification sent',
+                'user' => [
+                    'name' => $user->name,
+                    'phone' => $user->phone,
+                    'preferred_channel' => $user->preferred_channel,
+                ],
+                'task' => $task->title,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    });
+
     // WhatsApp configuration check endpoint
     Route::get('/diag/whatsapp', function (Request $request) {
         if ($request->query('token') !== env('DIAG_TOKEN')) {
