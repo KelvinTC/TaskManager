@@ -85,13 +85,20 @@ class RegisterController extends Controller
             ->where('registered', false)
             ->first();
 
+        // Use phone from registration form, or fall back to invited user's phone
+        $phone = $data['phone'] ?? $invited->phone_number;
+
+        // Set preferred channel to whatsapp if phone is provided
+        $preferredChannel = !empty($phone) ? 'whatsapp' : 'in_app';
+
         // Create the user with the role from the invitation
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'phone' => $data['phone'] ?? null,
+            'phone' => $phone,
             'role' => $invited->role,
+            'preferred_channel' => $preferredChannel,
         ]);
 
         // Mark the invitation as registered
