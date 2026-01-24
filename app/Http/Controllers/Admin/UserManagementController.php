@@ -164,7 +164,7 @@ class UserManagementController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|regex:/^\+[1-9]\d{1,14}$/',
             'role' => 'required|in:super_admin,admin,employee',
-            'preferred_channel' => 'required|in:email,sms,whatsapp',
+            'preferred_channel' => 'required|in:whatsapp,in_app',
         ]);
 
         // Only super admin can change roles to super_admin

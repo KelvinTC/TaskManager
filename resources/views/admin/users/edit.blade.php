@@ -85,14 +85,11 @@
                             <label for="preferred_channel" class="form-label">Preferred Notification Channel</label>
                             <select id="preferred_channel" class="form-select @error('preferred_channel') is-invalid @enderror"
                                     name="preferred_channel" required>
-                                <option value="email" {{ old('preferred_channel', $user->preferred_channel) == 'email' ? 'selected' : '' }}>
-                                    Email
-                                </option>
-                                <option value="sms" {{ old('preferred_channel', $user->preferred_channel) == 'sms' ? 'selected' : '' }}>
-                                    SMS
-                                </option>
                                 <option value="whatsapp" {{ old('preferred_channel', $user->preferred_channel) == 'whatsapp' ? 'selected' : '' }}>
                                     WhatsApp
+                                </option>
+                                <option value="in_app" {{ old('preferred_channel', $user->preferred_channel) == 'in_app' ? 'selected' : '' }}>
+                                    In-App Only
                                 </option>
                             </select>
 
@@ -101,6 +98,7 @@
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
+                            <small class="form-text text-muted">WhatsApp requires a valid phone number</small>
                         </div>
 
                         @if($user->isSuperAdmin())
