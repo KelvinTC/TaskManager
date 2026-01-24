@@ -78,7 +78,7 @@ class DashboardController extends Controller
             ->get();
 
         $employees = User::where('role', 'employee')
-            ->withCount(['assignedTasks'])
+            ->with(['assignedTasks'])
             ->get();
 
         $tasksByPriority = (clone $query)
