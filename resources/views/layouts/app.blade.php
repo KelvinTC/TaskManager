@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
@@ -46,7 +46,7 @@
                     <!-- Dark Mode Toggle -->
                     <button class="btn btn-outline-secondary dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode" style="border-radius: 50px; padding: 0.35rem 0.75rem;">
                         <span class="toggle-icon">
-                            <i class="bi bi-sun-fill"></i>
+                            <i class="bi bi-moon-fill"></i>
                         </span>
                     </button>
 
@@ -154,16 +154,16 @@
                 }
             }
 
-            // Check for saved theme preference or default to light mode
+            // Check for saved theme preference or default to dark mode
             let savedTheme = localStorage.getItem('theme');
 
             @auth
             if (!savedTheme) {
-                savedTheme = '{{ auth()->user()->dark_mode ?? "light" }}';
+                savedTheme = '{{ auth()->user()->dark_mode ?? "dark" }}';
             }
             @else
             if (!savedTheme) {
-                savedTheme = 'light';
+                savedTheme = 'dark';
             }
             @endauth
 

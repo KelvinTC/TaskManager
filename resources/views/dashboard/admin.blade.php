@@ -61,22 +61,22 @@
     <!-- Navigation Tabs -->
     <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active text-dark" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button">
                 <i class="bi bi-graph-up"></i> Overview
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link text-dark" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button">
+            <button class="nav-link" id="team-tab" data-bs-toggle="tab" data-bs-target="#team" type="button">
                 <i class="bi bi-people"></i> Team Performance
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link text-dark" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button">
+            <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button">
                 <i class="bi bi-list-task"></i> Recent Tasks
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link text-dark" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button">
+            <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button">
                 <i class="bi bi-file-earmark-bar-graph"></i> Reports & Filters
             </button>
         </li>
