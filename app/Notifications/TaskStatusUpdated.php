@@ -6,10 +6,12 @@ use App\Models\Task;
 use App\Channels\SmsChannel;
 use App\Channels\WhatsappChannel;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
-class TaskStatusUpdated extends Notification
+class TaskStatusUpdated extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -24,6 +26,14 @@ class TaskStatusUpdated extends Notification
     {
         $channels = ['database'];
 
+        Log::info('TaskStatusUpdated notification via() called', [
+            'notifiable_id' => $notifiable->id,
+            'notifiable_name' => $notifiable->name,
+            'preferred_channel' => $notifiable->preferred_channel,
+            'task_id' => $this->task->id,
+            'task_status' => $this->task->status
+        ]);
+
         switch ($notifiable->preferred_channel) {
             case 'sms':
                 $channels[] = SmsChannel::class;
@@ -35,6 +45,8 @@ class TaskStatusUpdated extends Notification
                 $channels[] = 'mail';
                 break;
         }
+
+        Log::info('TaskStatusUpdated notification channels', ['channels' => $channels]);
 
         return $channels;
     }

@@ -12,14 +12,17 @@ class UserInvited extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    protected $invitedUser;
-    protected $invitedBy;
-    protected $role;
+    public $invitedUserEmail;
+    public $invitedUserPhone;
+    public $invitedByName;
+    public $role;
 
     public function __construct($invitedUser, $invitedBy, $role)
     {
-        $this->invitedUser = $invitedUser;
-        $this->invitedBy = $invitedBy;
+        // Store only the data we need, not the full models
+        $this->invitedUserEmail = $invitedUser->email;
+        $this->invitedUserPhone = $invitedUser->phone_number;
+        $this->invitedByName = $invitedBy->name;
         $this->role = $role;
     }
 
@@ -28,7 +31,7 @@ class UserInvited extends Notification implements ShouldQueue
         $channels = ['mail'];
 
         // Add WhatsApp if phone number is provided
-        if (!empty($this->invitedUser->phone_number)) {
+        if (!empty($this->invitedUserPhone)) {
             $channels[] = WhatsappChannel::class;
         }
 
@@ -44,11 +47,11 @@ class UserInvited extends Notification implements ShouldQueue
             )
             ->subject('You\'ve Been Invited to Task Manager!')
             ->greeting('Hello!')
-            ->line('You have been invited to join Task Manager by ' . $this->invitedBy->name . '.')
+            ->line('You have been invited to join Task Manager by ' . $this->invitedByName . '.')
             ->line('Role: ' . ucfirst(str_replace('_', ' ', $this->role)))
-            ->line('Email: ' . $this->invitedUser->email)
+            ->line('Email: ' . $this->invitedUserEmail)
             ->action('Register Now', url('/register'))
-            ->line('Please register with the email address: ' . $this->invitedUser->email)
+            ->line('Please register with the email address: ' . $this->invitedUserEmail)
             ->line('Thank you for joining our team!');
     }
 
@@ -58,12 +61,12 @@ class UserInvited extends Notification implements ShouldQueue
         $registerUrl = url('/register');
 
         return "🎉 *Welcome to {$appName}!*\n\n" .
-               "You have been invited by *{$this->invitedBy->name}*\n\n" .
+               "You have been invited by *{$this->invitedByName}*\n\n" .
                "📋 *Role:* " . ucfirst(str_replace('_', ' ', $this->role)) . "\n" .
-               "📧 *Email:* {$this->invitedUser->email}\n\n" .
+               "📧 *Email:* {$this->invitedUserEmail}\n\n" .
                "👉 Please complete your registration:\n" .
                "{$registerUrl}\n\n" .
-               "⚠️ *Important:* Use the email address *{$this->invitedUser->email}* when registering.\n\n" .
+               "⚠️ *Important:* Use the email address *{$this->invitedUserEmail}* when registering.\n\n" .
                "Welcome to the team! 🚀";
     }
 }
