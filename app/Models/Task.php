@@ -15,6 +15,8 @@ class Task extends Model
         'status',
         'scheduled_at',
         'completed_at',
+        'last_reminded_at',
+        'overdue_notified_at',
         'priority',
     ];
 
@@ -23,6 +25,8 @@ class Task extends Model
         return [
             'scheduled_at' => 'datetime',
             'completed_at' => 'datetime',
+            'last_reminded_at' => 'datetime',
+            'overdue_notified_at' => 'datetime',
         ];
     }
 
