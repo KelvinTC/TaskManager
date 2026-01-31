@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Channels\WhatsappChannel;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class SendWhatsAppInvitation implements ShouldQueue
@@ -40,25 +40,19 @@ class SendWhatsAppInvitation implements ShouldQueue
                    "Please complete your registration:\n" .
                    "{$registerUrl}\n\n";
 
-        $channel = new WhatsappChannel();
-
-        // Create a simple object to pass to the channel
-        $notifiable = new class($this->phoneNumber) {
-            public $phone;
-            public function __construct($phone) { $this->phone = $phone; }
-            public function routeNotificationFor($channel) { return $this->phone; }
-        };
-
-        // Create a simple notification object
-        $notification = new class($message) {
-            public $message;
-            public function __construct($message) { $this->message = $message; }
-            public function toWhatsapp($notifiable) { return $this->message; }
-        };
+        $provider = config('services.whatsapp.provider', 'ultramsg');
 
         try {
-            $channel->send($notifiable, $notification);
-            Log::info('WhatsApp invitation sent successfully', ['phone' => $this->phoneNumber]);
+            switch ($provider) {
+                case 'ultramsg':
+                    $this->sendViaUltramsg($message);
+                    break;
+                case 'meta':
+                    $this->sendViaMeta($message);
+                    break;
+                default:
+                    Log::warning("Unknown WhatsApp provider: {$provider}");
+            }
         } catch (\Exception $e) {
             Log::error('Failed to send WhatsApp invitation', [
                 'phone' => $this->phoneNumber,
@@ -66,5 +60,64 @@ class SendWhatsAppInvitation implements ShouldQueue
             ]);
             throw $e;
         }
+    }
+
+    protected function sendViaUltramsg(string $message): void
+    {
+        $instanceId = config('services.whatsapp.ultramsg.instance_id');
+        $token = config('services.whatsapp.ultramsg.token');
+
+        if (empty($instanceId) || empty($token)) {
+            Log::warning('Ultramsg credentials not configured');
+            return;
+        }
+
+        $response = Http::post("https://api.ultramsg.com/{$instanceId}/messages/chat", [
+            'token' => $token,
+            'to' => $this->phoneNumber,
+            'body' => $message,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('Ultramsg API error: ' . $response->body());
+            throw new \Exception('Ultramsg send failed: ' . $response->body());
+        }
+
+        Log::info('WhatsApp invitation sent successfully', [
+            'phone' => $this->phoneNumber,
+            'response' => $response->json(),
+        ]);
+    }
+
+    protected function sendViaMeta(string $message): void
+    {
+        $token = config('services.whatsapp.meta.token');
+        $phoneId = config('services.whatsapp.meta.phone_id');
+        $version = config('services.whatsapp.meta.version', 'v21.0');
+
+        if (empty($token) || empty($phoneId)) {
+            Log::warning('Meta WhatsApp credentials not configured');
+            return;
+        }
+
+        $to = ltrim($this->phoneNumber, '+');
+
+        $response = Http::withToken($token)
+            ->post("https://graph.facebook.com/{$version}/{$phoneId}/messages", [
+                'messaging_product' => 'whatsapp',
+                'to' => $to,
+                'type' => 'text',
+                'text' => ['body' => $message],
+            ]);
+
+        if ($response->failed()) {
+            Log::error('Meta WhatsApp API error: ' . $response->body());
+            throw new \Exception('Meta WhatsApp send failed: ' . $response->body());
+        }
+
+        Log::info('WhatsApp invitation sent successfully', [
+            'phone' => $this->phoneNumber,
+            'message_id' => $response->json('messages.0.id'),
+        ]);
     }
 }
