@@ -53,28 +53,24 @@ class UserManagementController extends Controller
     public function invite(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:users,email|unique:invited_users,email',
+            'name' => 'required|string|max:255',
             'phone_number' => 'nullable|string|regex:/^\+[1-9]\d{1,14}$/',
             'role' => 'required|in:admin,employee',
         ]);
 
         $invitedUser = InvitedUser::create([
-            'email' => $request->email,
+            'name' => $request->name,
             'phone_number' => $request->phone_number,
             'role' => $request->role,
             'invited_by' => Auth::id(),
         ]);
 
-        // Send invitation email and WhatsApp
+        // Send invitation via WhatsApp
         try {
-            $notification = Notification::route('mail', $invitedUser->email);
-
-            // Add WhatsApp route if phone number is provided
             if (!empty($invitedUser->phone_number)) {
-                $notification = $notification->route('whatsapp', $invitedUser->phone_number);
+                $notification = Notification::route('whatsapp', $invitedUser->phone_number);
+                $notification->notify(new UserInvited($invitedUser, Auth::user(), $request->role));
             }
-
-            $notification->notify(new UserInvited($invitedUser, Auth::user(), $request->role));
         } catch (\Exception $e) {
             \Log::warning('Failed to send invitation notification: ' . $e->getMessage());
             // Don't fail the invitation if notification fails

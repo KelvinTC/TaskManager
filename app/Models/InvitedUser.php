@@ -10,6 +10,7 @@ class InvitedUser extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name',
         'email',
         'phone_number',
         'role',

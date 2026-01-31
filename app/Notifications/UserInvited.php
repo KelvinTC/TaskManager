@@ -12,7 +12,7 @@ class UserInvited extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public $invitedUserEmail;
+    public $invitedUserName;
     public $invitedUserPhone;
     public $invitedByName;
     public $role;
@@ -20,7 +20,7 @@ class UserInvited extends Notification implements ShouldQueue
     public function __construct($invitedUser, $invitedBy, $role)
     {
         // Store only the data we need, not the full models
-        $this->invitedUserEmail = $invitedUser->email;
+        $this->invitedUserName = $invitedUser->name;
         $this->invitedUserPhone = $invitedUser->phone_number;
         $this->invitedByName = $invitedBy->name;
         $this->role = $role;
@@ -28,9 +28,9 @@ class UserInvited extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        $channels = ['mail'];
+        $channels = [];
 
-        // Add WhatsApp if phone number is provided
+        // Only use WhatsApp channel
         if (!empty($this->invitedUserPhone)) {
             $channels[] = WhatsappChannel::class;
         }
@@ -62,7 +62,7 @@ class UserInvited extends Notification implements ShouldQueue
         $appName = config('app.name', 'Task Manager');
         $registerUrl = url('/register?phone=' . urlencode($this->invitedUserPhone));
 
-        return "*Welcome to {$appName}!*\n\n" .
+        return "*Welcome to {$appName}, {$this->invitedUserName}!*\n\n" .
                "You have been invited by *{$this->invitedByName}*\n\n" .
                "👉 Please complete your registration:\n" .
                "{$registerUrl}\n\n";

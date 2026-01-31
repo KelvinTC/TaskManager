@@ -36,7 +36,7 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Email</th>
+                                    <th>Name</th>
                                     <th>Role</th>
                                     <th>Invited By</th>
                                     <th>Invited On</th>
@@ -46,7 +46,7 @@
                             <tbody>
                                 @foreach($invitedUsers as $invited)
                                 <tr>
-                                    <td>{{ $invited->email }}</td>
+                                    <td>{{ $invited->name }}</td>
                                     <td>
                                         <span class="badge bg-{{ $invited->role === 'admin' ? 'primary' : 'secondary' }}">
                                             {{ ucfirst($invited->role) }}

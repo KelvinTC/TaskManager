@@ -47,6 +47,7 @@ class RegisterController extends Controller
     public function showRegistrationForm(\Illuminate\Http\Request $request)
     {
         $phone = $request->query('phone');
+        $invitedName = null;
         $invitedEmail = null;
 
         if ($phone) {
@@ -55,11 +56,12 @@ class RegisterController extends Controller
                 ->first();
 
             if ($invited) {
+                $invitedName = $invited->name;
                 $invitedEmail = $invited->email;
             }
         }
 
-        return view('auth.register', compact('phone', 'invitedEmail'));
+        return view('auth.register', compact('phone', 'invitedName', 'invitedEmail'));
     }
 
     /**
