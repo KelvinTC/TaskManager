@@ -33,7 +33,8 @@ class SendWhatsAppInvitation implements ShouldQueue
     public function handle(): void
     {
         $appName = config('app.name', 'Task Manager');
-        $registerUrl = url('/register?phone=' . urlencode($this->phoneNumber));
+        $appUrl = config('app.url', 'https://smartwork.up.railway.app');
+        $registerUrl = rtrim($appUrl, '/') . '/register?phone=' . urlencode($this->phoneNumber);
 
         $message = "*Welcome to {$appName}, {$this->userName}!*\n\n" .
                    "You have been invited by *{$this->invitedByName}*\n\n" .

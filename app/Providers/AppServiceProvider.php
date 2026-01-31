@@ -28,12 +28,19 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
 
+            // Force root URL from APP_URL config for queue workers and console commands
+            // (they don't have HTTP request context)
+            $appUrl = config('app.url');
+            if ($appUrl && $appUrl !== 'http://localhost') {
+                URL::forceRootUrl($appUrl);
+            }
+
             // Derive APP_URL dynamically if not set correctly at runtime.
             // This helps avoid 419 CSRF/session issues caused by APP_URL pointing to a different host
             // (e.g., committed .env url or a previous Railway app name).
             try {
                 $request = $this->app['request'] ?? null;
-                if ($request) {
+                if ($request && !$this->app->runningInConsole()) {
                     $host = $request->getHttpHost();
                     if ($host) {
                         $configured = (string) config('app.url', '');
