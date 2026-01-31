@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWhatsAppInvitation;
 use App\Models\InvitedUser;
 use App\Models\User;
-use App\Notifications\UserInvited;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
 
 class UserManagementController extends Controller
 {
@@ -65,15 +64,14 @@ class UserManagementController extends Controller
             'invited_by' => Auth::id(),
         ]);
 
-        // Send invitation via WhatsApp
-        try {
-            if (!empty($invitedUser->phone_number)) {
-                $notification = Notification::route('whatsapp', $invitedUser->phone_number);
-                $notification->notify(new UserInvited($invitedUser, Auth::user(), $request->role));
-            }
-        } catch (\Exception $e) {
-            \Log::warning('Failed to send invitation notification: ' . $e->getMessage());
-            // Don't fail the invitation if notification fails
+        // Dispatch WhatsApp invitation to queue (runs in background)
+        if (!empty($invitedUser->phone_number)) {
+            SendWhatsAppInvitation::dispatch(
+                $invitedUser->phone_number,
+                $invitedUser->name,
+                Auth::user()->name,
+                $request->role
+            );
         }
 
         return redirect()->route('admin.users.index')
