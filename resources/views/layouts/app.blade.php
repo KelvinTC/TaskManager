@@ -11,7 +11,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#FF6101">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
@@ -34,10 +34,11 @@
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <nav class="navbar navbar-expand-md shadow-sm premium-navbar">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}" style="color: #1e40af; font-weight: 600;">
-                    <i class="bi bi-kanban"></i> {{ config('app.name', 'Task Manager') }}
+                <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}" style="font-weight: 600;">
+                    <img src="{{ asset('images/varondi.png') }}" alt="Varondi" class="navbar-logo" style="height: 40px; margin-right: 0.5rem;">
+                    <span class="d-none d-md-inline navbar-brand-text">{{ config('app.name', 'Task Manager') }}</span>
                 </a>
 
                 @auth
@@ -46,7 +47,7 @@
                     <!-- Dark Mode Toggle -->
                     <button class="btn btn-outline-secondary dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode" style="border-radius: 50px; padding: 0.35rem 0.75rem;">
                         <span class="toggle-icon">
-                            <i class="bi bi-moon-fill"></i>
+                            <i class="bi bi-sun-fill"></i>
                         </span>
                     </button>
 
@@ -145,11 +146,13 @@
 
                 if (toggleIcon) {
                     if (theme === 'dark') {
-                        toggleIcon.classList.remove('bi-sun-fill');
-                        toggleIcon.classList.add('bi-moon-fill');
-                    } else {
+                        // In dark mode, show sun icon (to switch to light)
                         toggleIcon.classList.remove('bi-moon-fill');
                         toggleIcon.classList.add('bi-sun-fill');
+                    } else {
+                        // In light mode, show moon icon (to switch to dark)
+                        toggleIcon.classList.remove('bi-sun-fill');
+                        toggleIcon.classList.add('bi-moon-fill');
                     }
                 }
             }

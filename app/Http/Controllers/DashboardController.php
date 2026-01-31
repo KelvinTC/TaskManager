@@ -26,8 +26,16 @@ class DashboardController extends Controller
         $user = Auth::user();
         $request = request();
 
-        // Build query with filters
-        $query = Task::where('created_by', $user->id);
+        // Build query with filters - include created tasks, assigned tasks, and public tasks
+        $query = Task::where(function($q) use ($user) {
+            $q->where('created_by', $user->id)
+              ->orWhere('assigned_to', $user->id);
+
+            // For regular admins, also show public tasks
+            if (!$user->isSuperAdmin()) {
+                $q->orWhere('visibility', 'public');
+            }
+        });
 
         // Apply status filter
         if ($request->has('status') && $request->status != '') {
@@ -77,9 +85,30 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $employees = User::where('role', 'employee')
-            ->with(['assignedTasks'])
-            ->get();
+        // Get employees and admins if super admin
+        if ($user->isSuperAdmin()) {
+            $employees = User::whereIn('role', ['employee', 'admin'])
+                ->with(['assignedTasks' => function($q) use ($user) {
+                    // Only show tasks that are viewable
+                    $q->where(function($query) use ($user) {
+                        $query->where('created_by', $user->id)
+                              ->orWhere('assigned_to', $user->id)
+                              ->orWhere('visibility', 'public');
+                    });
+                }])
+                ->get();
+        } else {
+            $employees = User::where('role', 'employee')
+                ->with(['assignedTasks' => function($q) use ($user) {
+                    // Only show tasks that are viewable
+                    $q->where(function($query) use ($user) {
+                        $query->where('created_by', $user->id)
+                              ->orWhere('assigned_to', $user->id)
+                              ->orWhere('visibility', 'public');
+                    });
+                }])
+                ->get();
+        }
 
         $tasksByPriority = (clone $query)
             ->select('priority', DB::raw('count(*) as count'))
@@ -105,9 +134,12 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Optimize: Get all tasks once and calculate stats in PHP
-        $allTasks = Task::where('assigned_to', $user->id)
-            ->select('id', 'status', 'priority', 'scheduled_at', 'created_at')
+        // Get tasks assigned to user + public tasks for stats calculation
+        $allTasks = Task::where(function($q) use ($user) {
+                $q->where('assigned_to', $user->id)
+                  ->orWhere('visibility', 'public');
+            })
+            ->select('id', 'status', 'priority', 'scheduled_at', 'created_at', 'assigned_to', 'visibility')
             ->get();
 
         $stats = [
@@ -121,12 +153,18 @@ class DashboardController extends Controller
         ];
 
         $recent_tasks = Task::with(['assignedTo', 'creator'])
-            ->where('assigned_to', $user->id)
+            ->where(function($q) use ($user) {
+                $q->where('assigned_to', $user->id)
+                  ->orWhere('visibility', 'public');
+            })
             ->latest()
             ->take(5)
             ->get();
 
-        $upcoming_tasks = Task::where('assigned_to', $user->id)
+        $upcoming_tasks = Task::where(function($q) use ($user) {
+                $q->where('assigned_to', $user->id)
+                  ->orWhere('visibility', 'public');
+            })
             ->where('scheduled_at', '>', now())
             ->orderBy('scheduled_at', 'asc')
             ->take(5)

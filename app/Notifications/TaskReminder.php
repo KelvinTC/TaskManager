@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Task;
+use App\Channels\SmsChannel;
 use App\Channels\WhatsappChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,11 +22,18 @@ class TaskReminder extends Notification
 
     public function via($notifiable)
     {
-        $channels = ['database', 'mail'];
+        $channels = ['database'];
 
-        // Add WhatsApp if user has phone number
-        if ($notifiable->phone_number) {
-            $channels[] = WhatsappChannel::class;
+        switch ($notifiable->preferred_channel) {
+            case 'sms':
+                $channels[] = SmsChannel::class;
+                break;
+            case 'whatsapp':
+                $channels[] = WhatsappChannel::class;
+                break;
+            case 'email':
+                $channels[] = 'mail';
+                break;
         }
 
         return $channels;

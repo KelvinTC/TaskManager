@@ -3,117 +3,114 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header py-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create New Task</h4>
-                        <a href="{{ route('tasks.index') }}" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-arrow-left"></i> Back to Tasks
+                        <h6 class="mb-0"><i class="bi bi-plus-circle"></i> Create Task</h6>
+                        <a href="{{ route('tasks.index') }}" class="btn btn-secondary btn-sm py-1">
+                            <i class="bi bi-arrow-left"></i>
                         </a>
                     </div>
                 </div>
 
-                <div class="card-body p-4">
+                <div class="card-body py-3">
                     @if ($errors->any())
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Validation Errors</h5>
-                            <ul class="mb-0">
+                        <div class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+                            <ul class="mb-0 small">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
 
                     <form method="POST" action="{{ route('tasks.store') }}" id="createTaskForm">
                         @csrf
 
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label for="title" class="form-label fw-bold">Task Title <span class="text-danger">*</span></label>
-                                <input id="title" type="text" class="form-control form-control-lg @error('title') is-invalid @enderror"
-                                    name="title" value="{{ old('title') }}" required autofocus placeholder="Enter task title...">
-
+                        <div class="row g-2 mb-2">
+                            <div class="col-8">
+                                <label for="title" class="form-label small mb-1">Title <span class="text-danger">*</span></label>
+                                <input id="title" type="text" class="form-control form-control-sm @error('title') is-invalid @enderror"
+                                    name="title" value="{{ old('title') }}" required autofocus placeholder="Task title">
                                 @error('title')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
+                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                 @enderror
                             </div>
-
-                            <div class="col-md-4 mb-3">
-                                <label for="priority" class="form-label fw-bold">Priority <span class="text-danger">*</span></label>
-                                <select id="priority" class="form-select form-select-lg @error('priority') is-invalid @enderror" name="priority" required>
-                                    <option value="">-- Select Priority --</option>
-                                    <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>🟢 Low</option>
-                                    <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>🟡 Medium</option>
-                                    <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>🔴 High</option>
+                            <div class="col-4">
+                                <label for="priority" class="form-label small mb-1">Priority <span class="text-danger">*</span></label>
+                                <select id="priority" class="form-select form-select-sm @error('priority') is-invalid @enderror" name="priority" required>
+                                    <option value="">Select</option>
+                                    <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Low</option>
+                                    <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>Medium</option>
+                                    <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>High</option>
                                 </select>
-
                                 @error('priority')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
+                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label for="description" class="form-label small mb-1">Description</label>
+                            <textarea id="description" class="form-control form-control-sm @error('description') is-invalid @enderror"
+                                name="description" rows="2" placeholder="Optional description">{{ old('description') }}</textarea>
+                            @error('description')
+                                <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label for="assigned_to" class="form-label small mb-1">Assign To <span class="text-danger">*</span></label>
+                                <select id="assigned_to" class="form-select form-select-sm @error('assigned_to') is-invalid @enderror" name="assigned_to" required>
+                                    <option value="">Select User</option>
+                                    @foreach($workers as $worker)
+                                        <option value="{{ $worker->id }}" {{ old('assigned_to') == $worker->id ? 'selected' : '' }}>
+                                            {{ $worker->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('assigned_to')
+                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="col-6">
+                                <label for="scheduled_at" class="form-label small mb-1">Schedule <span class="text-danger">*</span></label>
+                                <input id="scheduled_at" type="datetime-local" class="form-control form-control-sm @error('scheduled_at') is-invalid @enderror"
+                                    name="scheduled_at" value="{{ old('scheduled_at') }}" required>
+                                @error('scheduled_at')
+                                    <span class="invalid-feedback" role="alert">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label fw-bold">Description</label>
-                            <textarea id="description" class="form-control @error('description') is-invalid @enderror"
-                                name="description" rows="5" placeholder="Enter detailed task description...">{{ old('description') }}</textarea>
-
-                            @error('description')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
+                            <label class="form-label small mb-1">Visibility <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="visibility" id="visibility_public" value="public" {{ old('visibility', 'public') == 'public' ? 'checked' : '' }} required>
+                                    <label class="form-check-label small" for="visibility_public">
+                                        <i class="bi bi-globe"></i> Public
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="visibility" id="visibility_private" value="private" {{ old('visibility') == 'private' ? 'checked' : '' }} required>
+                                    <label class="form-check-label small" for="visibility_private">
+                                        <i class="bi bi-lock-fill"></i> Private
+                                    </label>
+                                </div>
+                            </div>
+                            @error('visibility')
+                                <span class="invalid-feedback d-block" role="alert">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="assigned_to" class="form-label fw-bold">Assign To <span class="text-danger">*</span></label>
-                                <select id="assigned_to" class="form-select form-select-lg @error('assigned_to') is-invalid @enderror" name="assigned_to" required>
-                                    <option value="">-- Select Employee --</option>
-                                    @foreach($workers as $worker)
-                                        <option value="{{ $worker->id }}" {{ old('assigned_to') == $worker->id ? 'selected' : '' }}>
-                                            {{ $worker->name }} ({{ $worker->email }})
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                @error('assigned_to')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="scheduled_at" class="form-label fw-bold">Schedule Date & Time <span class="text-danger">*</span></label>
-                                <input id="scheduled_at" type="datetime-local" class="form-control form-control-lg @error('scheduled_at') is-invalid @enderror"
-                                    name="scheduled_at" value="{{ old('scheduled_at') }}" required>
-
-                                @error('scheduled_at')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> <strong>Note:</strong> The assigned employee will be notified about this task via  whatsapp.
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{{ route('tasks.index') }}" class="btn btn-secondary btn-lg">
-                                <i class="bi bi-x-circle"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-check-circle"></i> Create Task
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('tasks.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-check-circle"></i> Create
                             </button>
                         </div>
                     </form>

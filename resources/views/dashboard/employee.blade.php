@@ -87,6 +87,10 @@
                                                     @if($task->priority === 'high') 🔴 @elseif($task->priority === 'medium') 🟡 @else 🟢 @endif
                                                     {{ ucfirst($task->priority) }}
                                                 </span>
+                                                <span class="badge bg-{{ ($task->visibility ?? 'public') === 'private' ? 'dark' : 'info' }}">
+                                                    <i class="bi bi-{{ ($task->visibility ?? 'public') === 'private' ? 'lock-fill' : 'globe' }}"></i>
+                                                    {{ ucfirst($task->visibility ?? 'public') }}
+                                                </span>
                                                 <span class="badge bg-light text-dark">
                                                     <i class="bi bi-calendar-event"></i> {{ $task->scheduled_at->format('M d, Y') }}
                                                 </span>

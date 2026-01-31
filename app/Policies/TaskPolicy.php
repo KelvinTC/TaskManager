@@ -14,7 +14,8 @@ class TaskPolicy
 
     public function view(User $user, Task $task): bool
     {
-        return $user->id === $task->assigned_to || $user->id === $task->created_by;
+        // Use the canBeViewedBy method from the Task model
+        return $task->canBeViewedBy($user);
     }
 
     public function create(User $user): bool

@@ -15,7 +15,7 @@ echo "===============================\n\n";
 
 // Check configuration
 echo "📋 Configuration:\n";
-echo "   Provider: " . config('services.whatsapp.provider') . "\n";
+echo "   Provider: " . config('services.whatsapp.provider') . "\n";clua
 echo "   Meta Token: " . (config('services.whatsapp.meta.token') ? '✅ Set' : '❌ Not set') . "\n";
 echo "   Meta Phone ID: " . (config('services.whatsapp.meta.phone_id') ? '✅ ' . config('services.whatsapp.meta.phone_id') : '❌ Not set') . "\n";
 echo "   Use Templates: " . (config('services.whatsapp.use_templates') ? 'Yes' : 'No') . "\n\n";

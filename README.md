@@ -31,7 +31,7 @@ A comprehensive Laravel-based task management system with Vue.js frontend, suppo
   - Completed tasks
   - Pending tasks
   - Overdue tasks
-  - Average completion time
+  - Average completion timeclau
 - ✅ **Time-Based Reports**: Daily, weekly, and monthly reports
 - ✅ **Client Dashboard**: Overview of all tasks and worker activity
 - ✅ **Worker Dashboard**: Personal task overview and upcoming tasks

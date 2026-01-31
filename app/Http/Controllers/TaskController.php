@@ -12,28 +12,89 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $perPage = $request->get('per_page', 10);
+        $search = $request->get('search');
+        $status = $request->get('status');
+        $priority = $request->get('priority');
+
+        // Validate per_page
+        if (!in_array($perPage, [5, 10, 50])) {
+            $perPage = 10;
+        }
 
         if ($user->canManageTasks()) {
-            $tasks = Task::with(['assignedTo', 'creator'])
-                ->where('created_by', $user->id)
-                ->latest()
-                ->paginate(15);
+            // Admins/Super admins see tasks they created + public tasks assigned to others
+            $query = Task::with(['assignedTo', 'creator'])
+                ->where(function($q) use ($user) {
+                    $q->where('created_by', $user->id)
+                      ->orWhere('assigned_to', $user->id)
+                      ->orWhere(function($query) use ($user) {
+                          $query->where('visibility', 'public');
+                          // Super admins can see all tasks
+                          if (!$user->isSuperAdmin()) {
+                              // Regular admins only see public tasks they didn't create
+                              $query->where('created_by', '!=', $user->id);
+                          }
+                      });
+                });
         } else {
-            $tasks = Task::with(['assignedTo', 'creator'])
-                ->where('assigned_to', $user->id)
-                ->latest()
-                ->paginate(15);
+            // Employees see tasks assigned to them + public tasks
+            $query = Task::with(['assignedTo', 'creator'])
+                ->where(function($q) use ($user) {
+                    $q->where('assigned_to', $user->id)
+                      ->orWhere('visibility', 'public');
+                });
         }
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhereHas('assignedTo', function($query) use ($search) {
+                      $query->where('name', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('creator', function($query) use ($search) {
+                      $query->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Apply status filter
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        // Apply priority filter
+        if ($priority) {
+            $query->where('priority', $priority);
+        }
+
+        $tasks = $query->latest()->paginate($perPage)->appends([
+            'per_page' => $perPage,
+            'search' => $search,
+            'status' => $status,
+            'priority' => $priority
+        ]);
 
         return view('tasks.index', compact('tasks'));
     }
 
     public function create()
     {
-        $workers = User::where('role', 'employee')->get();
+        $user = Auth::user();
+
+        // Super admins can assign tasks to both admins and employees
+        if ($user->isSuperAdmin()) {
+            $workers = User::whereIn('role', ['admin', 'employee'])->get();
+        } else {
+            // Regular admins can only assign to employees
+            $workers = User::where('role', 'employee')->get();
+        }
+
         return view('tasks.create', compact('workers'));
     }
 
@@ -50,6 +111,7 @@ class TaskController extends Controller
             'assigned_to' => 'required|exists:users,id',
             'scheduled_at' => 'required|date',
             'priority' => 'required|in:low,medium,high',
+            'visibility' => 'required|in:public,private',
         ]);
 
         \Log::info('Validation passed', ['validated_data' => $validated]);
@@ -80,7 +142,16 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
         $this->authorize('update', $task);
-        $workers = User::where('role', 'employee')->get();
+
+        $user = Auth::user();
+
+        // Super admins can assign tasks to both admins and employees
+        if ($user->isSuperAdmin()) {
+            $workers = User::whereIn('role', ['admin', 'employee'])->get();
+        } else {
+            // Regular admins can only assign to employees
+            $workers = User::where('role', 'employee')->get();
+        }
 
         return view('tasks.edit', compact('task', 'workers'));
     }
@@ -96,6 +167,7 @@ class TaskController extends Controller
             'scheduled_at' => 'required|date',
             'priority' => 'required|in:low,medium,high',
             'status' => 'nullable|in:pending,in_progress,completed,overdue',
+            'visibility' => 'required|in:public,private',
         ]);
 
         $oldScheduledAt = $task->scheduled_at;
