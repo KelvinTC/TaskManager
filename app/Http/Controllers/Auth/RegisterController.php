@@ -48,7 +48,6 @@ class RegisterController extends Controller
     {
         $phone = $request->query('phone');
         $invitedName = null;
-        $invitedEmail = null;
 
         if ($phone) {
             $invited = InvitedUser::where('phone_number', $phone)
@@ -57,11 +56,10 @@ class RegisterController extends Controller
 
             if ($invited) {
                 $invitedName = $invited->name;
-                $invitedEmail = $invited->email;
             }
         }
 
-        return view('auth.register', compact('phone', 'invitedName', 'invitedEmail'));
+        return view('auth.register', compact('phone', 'invitedName'));
     }
 
     /**
@@ -74,7 +72,6 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'phone' => [
                 'required',
@@ -107,8 +104,9 @@ class RegisterController extends Controller
             ->where('registered', false)
             ->first();
 
-        // Use email from registration form, or fall back to invited user's email
-        $email = $data['email'] ?? $invited->email;
+        // Generate email from phone number (used as unique identifier for login)
+        $phone = preg_replace('/[^0-9]/', '', $data['phone']);
+        $email = $phone . '@user.local';
 
         // Create the user with the role from the invitation
         $user = User::create([
@@ -117,7 +115,7 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
             'phone' => $data['phone'],
             'role' => $invited->role,
-            'preferred_channel' => 'whatsapp', // Always WhatsApp since phone is required
+            'preferred_channel' => 'whatsapp',
         ]);
 
         // Mark the invitation as registered

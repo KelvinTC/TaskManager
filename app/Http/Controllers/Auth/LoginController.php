@@ -52,12 +52,24 @@ class LoginController extends Controller
     {
         $credentials = $this->credentials($request);
 
-        // Only handle the conventional email login case
-        $email = $credentials['email'] ?? null;
+        $username = $credentials['email'] ?? null;
         $plain = $credentials['password'] ?? null;
 
-        if ($email && $plain) {
-            $user = User::where('email', $email)->first();
+        if ($username && $plain) {
+            // Check if username looks like a phone number
+            if (preg_match('/^\+?[0-9]{10,15}$/', $username)) {
+                // Try to find user by phone number
+                $user = User::where('phone', $username)->first();
+                if (!$user) {
+                    // Also try with/without + prefix
+                    $phoneVariant = str_starts_with($username, '+') ? substr($username, 1) : '+' . $username;
+                    $user = User::where('phone', $phoneVariant)->first();
+                }
+            } else {
+                // Find by email
+                $user = User::where('email', $username)->first();
+            }
+
             if ($user) {
                 $stored = (string) $user->password;
                 // If the stored password is not a bcrypt hash (starts with $2y$),
@@ -67,11 +79,12 @@ class LoginController extends Controller
                         $user->password = bcrypt($plain);
                         $user->save();
                     } else {
-                        // For non-bcrypt, non-matching legacy values, avoid calling guard()->attempt
-                        // because the hasher will throw a RuntimeException. Fail authentication cleanly.
                         return false;
                     }
                 }
+
+                // Attempt login with the user's actual email
+                $credentials['email'] = $user->email;
             }
         }
 
@@ -81,9 +94,21 @@ class LoginController extends Controller
                 $request->boolean('remember')
             );
         } catch (\RuntimeException $e) {
-            // Gracefully handle unexpected hasher errors (e.g., unsupported legacy hashes)
             report($e);
             return false;
         }
+    }
+
+    /**
+     * Log the user out of the application.
+     */
+    public function logout(Request $request)
+    {
+        $this->guard()->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login');
     }
 }

@@ -34,12 +34,12 @@ class UserManagementController extends Controller
     {
         $users = User::where('role', '!=', 'super_admin')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10, ['*'], 'users_page');
 
         $invitedUsers = InvitedUser::with('inviter')
             ->notRegistered()
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10, ['*'], 'invitations_page');
 
         return view('admin.users.index', compact('users', 'invitedUsers'));
     }
@@ -93,7 +93,7 @@ class UserManagementController extends Controller
     {
         if ($user->role === 'employee') {
             $user->update(['role' => 'admin']);
-            return redirect()->back()->with('success', 'User promoted to Admin successfully!');
+            return redirect()->back()->with('success', 'User is now an Admin!');
         }
 
         return redirect()->back()->with('error', 'Cannot promote this user.');
@@ -103,7 +103,7 @@ class UserManagementController extends Controller
     {
         if ($user->role === 'admin') {
             $user->update(['role' => 'employee']);
-            return redirect()->back()->with('success', 'User demoted to Employee successfully!');
+            return redirect()->back()->with('success', 'User is now an Employee!');
         }
 
         return redirect()->back()->with('error', 'Cannot demote this user.');

@@ -29,7 +29,7 @@
             @if($invitedUsers->count() > 0)
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">Pending Invitations ({{ $invitedUsers->count() }})</h5>
+                    <h5 class="mb-0">Pending Invitations ({{ $invitedUsers->total() }})</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -68,6 +68,11 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($invitedUsers->hasPages())
+                        <div class="mt-3">
+                            {{ $invitedUsers->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
             @endif
@@ -75,7 +80,7 @@
             <!-- Registered Users -->
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Registered Users ({{ $users->count() }})</h5>
+                    <h5 class="mb-0">Registered Users ({{ $users->total() }})</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -110,15 +115,15 @@
                                             @if($user->role === 'employee')
                                                 <form action="{{ route('admin.users.promote', $user) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Promote this user to Admin?')">
-                                                        <i class="bi bi-arrow-up-circle"></i> Promote
+                                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Make this user an Admin?')">
+                                                        <i class="bi bi-arrow-up-circle"></i> Make Admin
                                                     </button>
                                                 </form>
                                             @elseif($user->role === 'admin')
                                                 <form action="{{ route('admin.users.demote', $user) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Demote this user to Employee?')">
-                                                        <i class="bi bi-arrow-down-circle"></i> Demote
+                                                    <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Change this user to Employee?')">
+                                                        <i class="bi bi-arrow-down-circle"></i> Make Employee
                                                     </button>
                                                 </form>
                                             @endif
@@ -142,6 +147,11 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($users->hasPages())
+                        <div class="mt-3">
+                            {{ $users->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
