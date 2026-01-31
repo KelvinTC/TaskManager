@@ -297,6 +297,29 @@ if (!empty(env('DIAG_TOKEN'))) {
         return response()->json($data);
     });
 
+    // Clear all caches endpoint
+    Route::get('/diag/clear-cache', function (Request $request) {
+        if ($request->query('token') !== env('DIAG_TOKEN')) {
+            abort(403);
+        }
+
+        $data = ['cleared' => []];
+
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        $data['cleared'][] = 'config';
+
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        $data['cleared'][] = 'cache';
+
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+        $data['cleared'][] = 'route';
+
+        \Illuminate\Support\Facades\Artisan::call('view:clear');
+        $data['cleared'][] = 'view';
+
+        return response()->json($data);
+    });
+
     // User diagnostic and fix endpoint
     Route::get('/diag/users', function (Request $request) {
         if ($request->query('token') !== env('DIAG_TOKEN')) {

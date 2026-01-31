@@ -64,14 +64,18 @@ class UserManagementController extends Controller
             'invited_by' => Auth::id(),
         ]);
 
-        // Dispatch WhatsApp invitation to queue (runs in background)
+        // Send WhatsApp invitation
         if (!empty($invitedUser->phone_number)) {
-            SendWhatsAppInvitation::dispatch(
-                $invitedUser->phone_number,
-                $invitedUser->name,
-                Auth::user()->name,
-                $request->role
-            );
+            try {
+                SendWhatsAppInvitation::dispatchSync(
+                    $invitedUser->phone_number,
+                    $invitedUser->name,
+                    Auth::user()->name,
+                    $request->role
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send WhatsApp invitation: ' . $e->getMessage());
+            }
         }
 
         return redirect()->route('admin.users.index')
