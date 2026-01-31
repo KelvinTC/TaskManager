@@ -65,7 +65,13 @@ class TaskController extends Controller
 
         // Apply status filter
         if ($status) {
-            $query->where('status', $status);
+            if ($status === 'overdue') {
+                // Overdue = past scheduled date and not completed
+                $query->where('scheduled_at', '<', now())
+                      ->where('status', '!=', 'completed');
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         // Apply priority filter

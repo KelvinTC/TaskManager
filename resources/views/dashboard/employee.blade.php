@@ -24,40 +24,40 @@
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-6 col-md-3 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-list-check text-primary" style="font-size: 2rem;"></i>
-                    <h3 class="text-primary mb-0 mt-2">{{ $stats['total_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Total</p>
+            <a href="{{ route('tasks.index') }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-list-check text-primary"></i>
+                    <h3>{{ $stats['total_tasks'] }}</h3>
+                    <p>Total</p>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-6 col-md-3 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-arrow-repeat text-info" style="font-size: 2rem;"></i>
-                    <h3 class="text-info mb-0 mt-2">{{ $stats['in_progress_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Active</p>
+            <a href="{{ route('tasks.index', ['status' => 'in_progress']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-arrow-repeat text-info"></i>
+                    <h3>{{ $stats['in_progress_tasks'] }}</h3>
+                    <p>Active</p>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-6 col-md-3 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
-                    <h3 class="text-success mb-0 mt-2">{{ $stats['completed_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Done</p>
+            <a href="{{ route('tasks.index', ['status' => 'completed']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-check-circle text-success"></i>
+                    <h3>{{ $stats['completed_tasks'] }}</h3>
+                    <p>Done</p>
                 </div>
-            </div>
+            </a>
         </div>
         <div class="col-6 col-md-3 mb-3">
-            <div class="card text-center shadow-sm h-100">
-                <div class="card-body">
-                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2rem;"></i>
-                    <h3 class="text-danger mb-0 mt-2">{{ $stats['overdue_tasks'] }}</h3>
-                    <p class="mb-0 small text-muted">Overdue</p>
+            <a href="{{ route('tasks.index', ['status' => 'overdue']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                    <h3>{{ $stats['overdue_tasks'] }}</h3>
+                    <p>Overdue</p>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 

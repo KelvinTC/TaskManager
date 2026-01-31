@@ -21,46 +21,58 @@
     <!-- Summary Stats -->
     <div class="row mb-4">
         <div class="col-md-2 col-6 mb-3">
-            <div class="stat-card hover-lift">
-                <i class="bi bi-people text-primary"></i>
-                <h3 class="text-primary">{{ $totals['total_workers'] }}</h3>
-                <p>Total Workers</p>
-            </div>
+            <a href="{{ route('admin.users.index') }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-people text-primary"></i>
+                    <h3>{{ $totals['total_workers'] }}</h3>
+                    <p>Workers</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-2 col-6 mb-3">
-            <div class="stat-card hover-lift">
-                <i class="bi bi-list-check text-info"></i>
-                <h3 class="text-info">{{ $totals['total_tasks'] }}</h3>
-                <p>Total Tasks</p>
-            </div>
+            <a href="{{ route('tasks.index') }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-list-check text-info"></i>
+                    <h3>{{ $totals['total_tasks'] }}</h3>
+                    <p>Tasks</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-2 col-6 mb-3">
-            <div class="stat-card hover-lift">
-                <i class="bi bi-check-circle text-success"></i>
-                <h3 class="text-success">{{ $totals['total_completed'] }}</h3>
-                <p>Completed</p>
-            </div>
+            <a href="{{ route('tasks.index', ['status' => 'completed']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-check-circle text-success"></i>
+                    <h3>{{ $totals['total_completed'] }}</h3>
+                    <p>Done</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-2 col-6 mb-3">
-            <div class="stat-card hover-lift">
-                <i class="bi bi-arrow-repeat text-warning"></i>
-                <h3 class="text-warning">{{ $totals['total_in_progress'] }}</h3>
-                <p>In Progress</p>
-            </div>
+            <a href="{{ route('tasks.index', ['status' => 'in_progress']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-arrow-repeat text-warning"></i>
+                    <h3>{{ $totals['total_in_progress'] }}</h3>
+                    <p>Active</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-2 col-6 mb-3">
-            <div class="stat-card hover-lift">
-                <i class="bi bi-clock-history text-secondary"></i>
-                <h3 class="text-secondary">{{ $totals['total_pending'] }}</h3>
-                <p>Pending</p>
-            </div>
+            <a href="{{ route('tasks.index', ['status' => 'pending']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-clock-history text-secondary"></i>
+                    <h3>{{ $totals['total_pending'] }}</h3>
+                    <p>Pending</p>
+                </div>
+            </a>
         </div>
         <div class="col-md-2 col-6 mb-3">
-            <div class="stat-card hover-lift">
-                <i class="bi bi-exclamation-triangle text-danger"></i>
-                <h3 class="text-danger">{{ $totals['total_overdue'] }}</h3>
-                <p>Overdue</p>
-            </div>
+            <a href="{{ route('tasks.index', ['status' => 'overdue']) }}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                    <h3>{{ $totals['total_overdue'] }}</h3>
+                    <p>Overdue</p>
+                </div>
+            </a>
         </div>
     </div>
 
