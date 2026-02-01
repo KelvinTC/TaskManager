@@ -120,36 +120,5 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('createTaskForm');
-
-    form.addEventListener('submit', function(e) {
-        console.log('Form submitted!');
-        console.log('Action:', form.action);
-        console.log('Method:', form.method);
-
-        // Check all required fields
-        const title = document.querySelector('[name="title"]').value;
-        const priority = document.querySelector('[name="priority"]').value;
-        const assignedTo = document.querySelector('[name="assigned_to"]').value;
-        const scheduledAt = document.querySelector('[name="scheduled_at"]').value;
-
-        console.log('Title:', title);
-        console.log('Priority:', priority);
-        console.log('Assigned To:', assignedTo);
-        console.log('Scheduled At:', scheduledAt);
-
-        if (!title || !priority || !assignedTo || !scheduledAt) {
-            console.error('Missing required fields!');
-            alert('Please fill in all required fields');
-            e.preventDefault();
-            return false;
-        }
-    });
-});
-</script>
-@endpush
 
 @endsection

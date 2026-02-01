@@ -199,6 +199,34 @@
         });
     </script>
 
+    <!-- Prevent double form submission globally -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form').forEach(function(form) {
+                let isSubmitting = false;
+                form.addEventListener('submit', function(e) {
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    isSubmitting = true;
+                    const btn = form.querySelector('button[type="submit"]');
+                    if (btn) {
+                        btn.disabled = true;
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing...';
+                        // Re-enable after 5s in case of error
+                        setTimeout(function() {
+                            isSubmitting = false;
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }, 5000);
+                    }
+                });
+            });
+        });
+    </script>
+
     @stack('scripts')
 </body>
 </html>
