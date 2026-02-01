@@ -27,8 +27,8 @@
     --gray-400: #9ca3af;
     --gray-500: #6b7280;
     --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
+    --gray-700: #2D2D2D;
+    --gray-800: #1D1D1D;
     --gray-900: #111827;
 
     /* Status Colors - Vibrant but Professional */
@@ -663,9 +663,20 @@ h6 { font-size: 0.8125rem; }
    ============================================ */
 
 @media (max-width: 767.98px) {
+    html {
+        overflow-x: hidden;
+    }
+
     body {
-        padding-bottom: 70px;
+        padding-bottom: 75px;
         padding-top: 60px;
+        -webkit-overflow-scrolling: touch;
+        overflow-x: hidden;
+    }
+
+    #app {
+        min-height: 100%;
+        position: relative;
     }
 
     .premium-navbar.sticky-top {
@@ -673,12 +684,19 @@ h6 { font-size: 0.8125rem; }
         top: 0;
         left: 0;
         right: 0;
+        width: 100%;
         z-index: 1030;
         height: 60px;
         min-height: 60px;
         max-height: 60px;
         padding: 0.5rem 0 !important;
         overflow: visible;
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        will-change: transform;
+        contain: layout style;
     }
 
     .premium-navbar .container {
@@ -730,15 +748,23 @@ h6 { font-size: 0.8125rem; }
         bottom: 0;
         left: 0;
         right: 0;
+        width: 100%;
+        height: 65px;
         background: #1D1D1D;
         border-top: 1px solid rgba(255, 97, 1, 0.2);
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
-        z-index: 1000;
+        z-index: 9999;
         display: flex;
         justify-content: space-around;
         align-items: center;
-        padding: 0.75rem 0;
-        backdrop-filter: blur(10px);
+        padding: 0.5rem 0;
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        transform: translate3d(0, 0, 0);
+        -webkit-transform: translate3d(0, 0, 0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        will-change: transform;
+        contain: layout style;
     }
 
     .mobile-bottom-nav .nav-item {
@@ -747,7 +773,7 @@ h6 { font-size: 0.8125rem; }
         align-items: center;
         text-decoration: none;
         color: rgba(255, 255, 255, 0.7);
-        transition: all 0.3s ease;
+        transition: color 0.2s ease;
         padding: 0.5rem 1rem;
         border-radius: var(--radius-md);
         min-width: 60px;
@@ -756,7 +782,6 @@ h6 { font-size: 0.8125rem; }
     .mobile-bottom-nav .nav-item i {
         font-size: 1.5rem;
         margin-bottom: 0.25rem;
-        transition: all 0.3s ease;
     }
 
     .mobile-bottom-nav .nav-item span {
@@ -770,9 +795,9 @@ h6 { font-size: 0.8125rem; }
         background-color: rgba(255, 97, 1, 0.2);
     }
 
-    .mobile-bottom-nav .nav-item:hover {
+    .mobile-bottom-nav .nav-item:active {
         color: white;
-        transform: translateY(-2px);
+        opacity: 0.8;
     }
 }
 
@@ -782,8 +807,8 @@ h6 { font-size: 0.8125rem; }
 
 [data-theme="dark"] {
     --gray-50: #111827;
-    --gray-100: #1f2937;
-    --gray-200: #374151;
+    --gray-100: #1D1D1D;
+    --gray-200: #2D2D2D;
     --gray-300: #4b5563;
     --gray-400: #6b7280;
     --gray-500: #9ca3af;
@@ -949,12 +974,12 @@ h6 { font-size: 0.8125rem; }
 }
 
 [data-theme="dark"] .mobile-bottom-nav {
-    background-color: #1e293b;
-    border-top-color: var(--gray-200);
+    background: #1D1D1D;
+    border-top: 1px solid rgba(255, 97, 1, 0.2);
 }
 
 [data-theme="dark"] .dropdown-menu {
-    background-color: #1e293b;
+    background-color: #1D1D1D;
     border-color: var(--gray-200);
 }
 
@@ -963,7 +988,7 @@ h6 { font-size: 0.8125rem; }
 }
 
 [data-theme="dark"] .dropdown-item:hover {
-    background-color: #374151;
+    background-color: #2D2D2D;
 }
 
 [data-theme="dark"] .text-muted {
@@ -1223,7 +1248,7 @@ h6 { font-size: 0.8125rem; }
 }
 
 [data-theme="dark"] .table-hover tbody tr:hover {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     color: #ffffff !important;
 }
 
@@ -1237,7 +1262,7 @@ h6 { font-size: 0.8125rem; }
 [data-theme="dark"] textarea,
 [data-theme="dark"] select {
     color: #f3f4f6 !important;
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     border-color: #4b5563 !important;
 }
 
@@ -1286,14 +1311,14 @@ h6 { font-size: 0.8125rem; }
 }
 
 [data-theme="dark"] .list-group-item {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     color: #f3f4f6 !important;
     border-color: #4b5563 !important;
 }
 
 /* Card headers in dark mode */
 [data-theme="dark"] .card-header {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     color: #f3f4f6 !important;
     border-color: #4b5563 !important;
 }
@@ -1401,8 +1426,8 @@ h6 { font-size: 0.8125rem; }
 
 /* Navbar dark mode overrides */
 [data-theme="dark"] .navbar {
-    background-color: #1f2937 !important;
-    border-bottom-color: #374151 !important;
+    background-color: #1D1D1D !important;
+    border-bottom-color: #2D2D2D !important;
 }
 
 [data-theme="dark"] .navbar * {
@@ -1420,18 +1445,18 @@ h6 { font-size: 0.8125rem; }
 }
 
 [data-theme="dark"] .bg-white {
-    background-color: #1f2937 !important;
+    background-color: #1D1D1D !important;
 }
 
 /* Card dark mode */
 [data-theme="dark"] .card {
-    background-color: #1f2937 !important;
-    border-color: #374151 !important;
+    background-color: #1D1D1D !important;
+    border-color: #2D2D2D !important;
     color: #f3f4f6 !important;
 }
 
 [data-theme="dark"] .card-body {
-    background-color: #1f2937 !important;
+    background-color: #1D1D1D !important;
     color: #f3f4f6 !important;
 }
 
@@ -1443,13 +1468,13 @@ h6 { font-size: 0.8125rem; }
 [data-theme="dark"] .table-dark,
 [data-theme="dark"] .table-dark th,
 [data-theme="dark"] .table-dark td {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     color: #f3f4f6 !important;
     border-color: #4b5563 !important;
 }
 
 [data-theme="dark"] thead {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     color: #f3f4f6 !important;
 }
 
@@ -1459,16 +1484,16 @@ h6 { font-size: 0.8125rem; }
 }
 
 [data-theme="dark"] tbody {
-    background-color: #1f2937 !important;
+    background-color: #1D1D1D !important;
 }
 
 [data-theme="dark"] tbody td {
     color: #f3f4f6 !important;
-    border-color: #374151 !important;
+    border-color: #2D2D2D !important;
 }
 
 [data-theme="dark"] tbody tr {
-    border-color: #374151 !important;
+    border-color: #2D2D2D !important;
 }
 
 /* Small text and descriptions */
@@ -1507,17 +1532,17 @@ h6 { font-size: 0.8125rem; }
 
 /* Mobile bottom nav */
 [data-theme="dark"] .mobile-bottom-nav {
-    background-color: #1f2937 !important;
-    border-top-color: #374151 !important;
+    background: #1D1D1D !important;
+    border-top: 1px solid rgba(255, 97, 1, 0.2) !important;
 }
 
 [data-theme="dark"] .mobile-bottom-nav .nav-item {
-    color: #9ca3af !important;
+    color: #A7A7A7 !important;
 }
 
 [data-theme="dark"] .mobile-bottom-nav .nav-item.active {
-    color: #ff7f3f !important;
-    background-color: rgba(255, 127, 63, 0.1) !important;
+    color: #FF6101 !important;
+    background-color: rgba(255, 97, 1, 0.15) !important;
 }
 
 [data-theme="dark"] .mobile-bottom-nav .nav-item i,
@@ -1805,13 +1830,13 @@ body {
 
 /* Specific fix for badges with bg-light in dark mode */
 [data-theme="dark"] .badge.bg-light {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
     color: #f3f4f6 !important;
 }
 
 /* Fix bg-light sections in dark mode (like statistics cards) */
 [data-theme="dark"] .bg-light {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
 }
 
 [data-theme="dark"] .bg-light h4,
@@ -1839,7 +1864,7 @@ body {
 }
 
 [data-theme="dark"] .table tbody tr:hover {
-    background-color: #374151 !important;
+    background-color: #2D2D2D !important;
 }
 
 /* Ensure badges remain visible */
