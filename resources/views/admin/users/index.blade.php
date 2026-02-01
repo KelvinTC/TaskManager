@@ -28,7 +28,7 @@
             <!-- Pending Invitations -->
             @if($invitedUsers->count() > 0)
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-warning text-dark">
+                <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Pending Invitations ({{ $invitedUsers->total() }})</h5>
                 </div>
                 <div class="card-body">
@@ -88,7 +88,6 @@
                             <thead>
                                 <tr>
                                     <th>Name</th>
-                                    <th>Email</th>
                                     <th>Phone</th>
                                     <th>Role</th>
                                     <th>Registered On</th>
@@ -99,7 +98,6 @@
                                 @forelse($users as $user)
                                 <tr>
                                     <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
                                     <td>{{ $user->phone ?? 'N/A' }}</td>
                                     <td>
                                         <span class="badge bg-{{ $user->role === 'admin' ? 'primary' : 'secondary' }}">
@@ -141,7 +139,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">No users registered yet.</td>
+                                    <td colspan="5" class="text-center text-muted">No users registered yet.</td>
                                 </tr>
                                 @endforelse
                             </tbody>

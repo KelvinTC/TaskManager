@@ -1,7 +1,42 @@
-// Body
-$body-bg: #f8fafc;
+// Varondi Dark Theme Colors
+$primary:       #FF6101;  // Varondi signature orange
+$secondary:     #c5a48e;  // Tan/beige accent
+$success:       #28a745;  // Green for success actions
+$danger:        #DC1F26;  // Varondi red
+$warning:       #FF6101;  // Orange for warnings
+$info:          #6c757d;  // Muted gray
+$dark:          #181818;  // Varondi dark
+$light:         #F8F8F8;  // Varondi light gray
+
+// Body - Dark Theme
+$body-bg:       #1D1D1D;
+$body-color:    #FFFFFF;
+
+// Cards
+$card-bg:       #252525;
+$card-border-color: #333333;
+$card-cap-bg:   #2a2a2a;
+
+// Tables
+$table-bg:      #252525;
+$table-color:   #FFFFFF;
+$table-border-color: #333333;
+$table-striped-bg: #2a2a2a;
+$table-hover-bg: #333333;
+
+// Inputs
+$input-bg:      #2a2a2a;
+$input-color:   #FFFFFF;
+$input-border-color: #444444;
+$input-placeholder-color: #A7A7A7;
+
+// Links
+$link-color:    #FF6101;
 
 // Typography
 $font-family-sans-serif: 'Nunito', sans-serif;
 $font-size-base: 0.9rem;
 $line-height-base: 1.6;
+
+// Text muted
+$text-muted:    #A7A7A7;

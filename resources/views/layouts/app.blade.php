@@ -34,7 +34,7 @@
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md shadow-sm premium-navbar">
+        <nav class="navbar navbar-expand-md shadow-sm premium-navbar sticky-top">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}" style="font-weight: 600;">
                     <img src="{{ asset('images/varondi.png') }}" alt="Varondi" class="navbar-logo" style="height: 40px; margin-right: 0.5rem;">

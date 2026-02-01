@@ -6,3 +6,50 @@
 
 // Bootstrap
 @import 'bootstrap/scss/bootstrap';
+
+// Varondi Dark Theme Customizations
+.navbar {
+    background-color: #181818 !important;
+    border-bottom: 1px solid #333;
+}
+
+.dropdown-menu {
+    background-color: #252525;
+    border-color: #333;
+
+    .dropdown-item {
+        color: #fff;
+
+        &:hover, &:focus {
+            background-color: #333;
+            color: #FF6101;
+        }
+    }
+}
+
+.btn-warning {
+    background-color: #c5a48e;
+    border-color: #c5a48e;
+    color: #181818;
+
+    &:hover {
+        background-color: darken(#c5a48e, 10%);
+        border-color: darken(#c5a48e, 10%);
+    }
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.alert-danger {
+    background-color: rgba(220, 31, 38, 0.2);
+    border-color: #DC1F26;
+    color: #DC1F26;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
