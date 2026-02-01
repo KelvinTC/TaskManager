@@ -203,6 +203,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('form').forEach(function(form) {
+                // Skip navbar forms (logout, etc.) - they don't need loading states
+                if (form.closest('.navbar') || form.closest('.mobile-bottom-nav')) {
+                    return;
+                }
+
                 let isSubmitting = false;
                 form.addEventListener('submit', function(e) {
                     if (isSubmitting) {
